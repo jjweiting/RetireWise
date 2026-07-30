@@ -1,16 +1,11 @@
 'use client'
 
 import { CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
+import { buildRetirementChartData } from '@/lib/chart'
 import type { RetirementResult } from '@/lib/types'
 
 interface Props {
   result: RetirementResult
-}
-
-interface ChartPoint {
-  year: number
-  fi4?: number
-  filt?: number
 }
 
 function compactMoney(value: number): string {
@@ -20,21 +15,14 @@ function compactMoney(value: number): string {
 }
 
 export default function RetirementCurveChart({ result }: Props) {
-  const byYear = new Map<number, ChartPoint>()
-
-  for (const row of result.fi4.table) {
-    byYear.set(row.year, { ...byYear.get(row.year), year: row.year, fi4: row.end_asset })
-  }
-
-  for (const row of result.filt.table) {
-    byYear.set(row.year, { ...byYear.get(row.year), year: row.year, filt: row.end_asset })
-  }
-
-  const data = Array.from(byYear.values()).sort((a, b) => a.year - b.year)
+  const { data, showFi4Dot, showFiltDot } = buildRetirementChartData(result)
 
   return (
     <section className="card">
       <h2>退休後資產曲線</h2>
+      {showFi4Dot && (
+        <p className="hint">指定月花費模式尚未達成 FI，因此只顯示最後檢查年份的投影點。</p>
+      )}
       <div className="chart-wrap">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={data} margin={{ top: 10, right: 20, left: 0, bottom: 4 }}>
@@ -43,8 +31,8 @@ export default function RetirementCurveChart({ result }: Props) {
             <YAxis tickFormatter={compactMoney} tickLine={false} axisLine={false} width={72} />
             <Tooltip formatter={(value) => `NT$ ${Number(value).toLocaleString()}`} />
             <Legend />
-            <Line name="指定月花費" type="monotone" dataKey="fi4" stroke="#0f766e" strokeWidth={3} dot={false} />
-            <Line name="壽命規劃" type="monotone" dataKey="filt" stroke="#b45309" strokeWidth={3} dot={false} />
+            <Line name="指定月花費" type="monotone" dataKey="fi4" stroke="#0f766e" strokeWidth={3} dot={showFi4Dot} />
+            <Line name="壽命規劃" type="monotone" dataKey="filt" stroke="#b45309" strokeWidth={3} dot={showFiltDot} />
           </LineChart>
         </ResponsiveContainer>
       </div>
