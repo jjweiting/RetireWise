@@ -102,7 +102,6 @@ export default function Home() {
       <header className="hero">
         <div>
           <p className="eyebrow">RetireWise Public</p>
-          <h1>退休自由，不用猜。</h1>
           <p className="lead">
             輸入自己的資產、儲蓄、生活費與報酬假設，快速比較「指定月花費」與「壽命規劃」兩種退休路徑。
           </p>
