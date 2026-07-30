@@ -2,11 +2,16 @@
 
 import { useEffect, useState } from 'react'
 import RetirementCurveChart from '@/components/retirement/RetirementCurveChart'
+import RetirementKeyYearSummary from '@/components/retirement/RetirementKeyYearSummary'
 import RetirementParams from '@/components/retirement/RetirementParams'
+import RetirementPresetSelector from '@/components/retirement/RetirementPresetSelector'
 import RetirementScenarioManager from '@/components/retirement/RetirementScenarioManager'
+import RetirementSensitivity from '@/components/retirement/RetirementSensitivity'
+import RetirementSharePanel from '@/components/retirement/RetirementSharePanel'
 import RetirementSummaryCards from '@/components/retirement/RetirementSummaryCards'
 import RetirementYearlyTable from '@/components/retirement/RetirementYearlyTable'
 import { calculateRetirementFI, DEFAULT_PARAMS, validateRetirementParams } from '@/lib/retirement'
+import { buildShareUrl, parseSharedParams } from '@/lib/share'
 import { deleteSavedScenario, loadSavedScenarios, saveSavedScenarios } from '@/lib/storage'
 import type { RetirementParams as RetirementParamsType, RetirementResult, SavedScenario } from '@/lib/types'
 
@@ -26,15 +31,31 @@ function calculateSafely(params: RetirementParamsType): RetirementResult | null 
 export default function Home() {
   const [params, setParams] = useState<RetirementParamsType>(DEFAULT_PARAMS)
   const [scenarios, setScenarios] = useState<SavedScenario[]>([])
+  const [sharedName, setSharedName] = useState<string | null>(null)
+  const [shareUrl, setShareUrl] = useState('')
   const errors = validateRetirementParams(params)
   const result = errors.length === 0 ? calculateSafely(params) : null
 
   useEffect(() => {
+    const shared = parseSharedParams(window.location.search, DEFAULT_PARAMS)
+    setParams(shared.params)
+    setSharedName(shared.name)
     setScenarios(loadSavedScenarios())
   }, [])
 
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    setShareUrl(buildShareUrl(window.location.origin, window.location.pathname, params, sharedName))
+  }, [params, sharedName])
+
   const updateParams = (updates: Partial<RetirementParamsType>) => {
+    setSharedName(null)
     setParams((current) => ({ ...current, ...updates }))
+  }
+
+  const applyPreset = (presetParams: RetirementParamsType) => {
+    setSharedName(null)
+    setParams(presetParams)
   }
 
   const saveScenario = (name: string) => {
@@ -59,6 +80,12 @@ export default function Home() {
 
     saveSavedScenarios(next)
     setScenarios(next)
+  }
+
+  const saveSharedScenario = () => {
+    if (!sharedName) return
+    saveScenario(sharedName)
+    setSharedName(null)
   }
 
   const applyScenario = (scenario: SavedScenario) => {
@@ -91,13 +118,18 @@ export default function Home() {
       </header>
 
       <div className="grid">
-        <RetirementParams params={params} errors={errors} onChange={updateParams} />
+        <div className="stack">
+          <RetirementPresetSelector onApply={applyPreset} />
+          <RetirementParams params={params} errors={errors} onChange={updateParams} />
+        </div>
 
         <div className="stack">
           {result ? (
             <>
               <RetirementSummaryCards result={result} params={params} />
+              <RetirementSensitivity params={params} />
               <RetirementCurveChart result={result} />
+              <RetirementKeyYearSummary fi4Table={result.fi4.table} filtTable={result.filt.table} />
               <RetirementYearlyTable fi4Table={result.fi4.table} filtTable={result.filt.table} />
             </>
           ) : (
@@ -107,6 +139,7 @@ export default function Home() {
             </section>
           )}
 
+          <RetirementSharePanel shareUrl={shareUrl} sharedName={sharedName} onSaveShared={saveSharedScenario} />
           <RetirementScenarioManager
             scenarios={scenarios}
             canSave={result !== null}

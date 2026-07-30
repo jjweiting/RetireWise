@@ -315,6 +315,128 @@ th {
   margin-top: 14px;
 }
 
+.preset-card {
+  background: rgba(236, 253, 245, 0.78);
+}
+
+.preset-grid {
+  display: grid;
+  gap: 10px;
+}
+
+.preset-button {
+  display: grid;
+  gap: 4px;
+  width: 100%;
+  border: 1px solid rgba(15, 118, 110, 0.22);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.74);
+  color: var(--ink);
+  padding: 13px;
+  text-align: left;
+}
+
+.preset-button span {
+  color: var(--brand-dark);
+  font-weight: 850;
+}
+
+.preset-button small {
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.share-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  margin-top: 12px;
+}
+
+.share-message {
+  color: var(--brand-dark);
+  font-size: 0.9rem;
+  font-weight: 750;
+}
+
+.import-callout {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 14px;
+  border: 1px solid rgba(180, 83, 9, 0.22);
+  border-radius: 18px;
+  background: rgba(255, 251, 235, 0.74);
+  padding: 12px;
+}
+
+.import-callout p {
+  margin: 0;
+  color: #854d0e;
+}
+
+.sensitivity-list {
+  display: grid;
+  gap: 10px;
+}
+
+.sensitivity-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  align-items: center;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.58);
+  padding: 13px;
+}
+
+.sensitivity-result {
+  display: grid;
+  gap: 4px;
+  min-width: 128px;
+  text-align: right;
+}
+
+.sensitivity-result span {
+  color: var(--muted);
+  font-size: 0.84rem;
+}
+
+.key-year-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.key-year-card {
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.58);
+  padding: 13px;
+}
+
+.table-details {
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.5);
+  padding: 12px;
+}
+
+.table-details summary {
+  color: var(--brand-dark);
+  cursor: pointer;
+  font-weight: 850;
+}
+
+.table-details .table-wrap {
+  margin-top: 12px;
+}
+
 .scenario-row {
   justify-content: space-between;
   border: 1px solid var(--line);
@@ -361,5 +483,18 @@ th {
 
   .chart-wrap {
     height: 300px;
+  }
+
+  .key-year-grid,
+  .sensitivity-row {
+    grid-template-columns: 1fr;
+  }
+
+  .sensitivity-row {
+    display: grid;
+  }
+
+  .sensitivity-result {
+    text-align: left;
   }
 }
