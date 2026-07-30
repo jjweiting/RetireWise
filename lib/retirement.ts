@@ -86,8 +86,9 @@ function calculateFixedExpenseMode(
   let yearsToRetire: number | null = null
   let requiredAtRetirement = 0
   let projectedAtRetirement = 0
+  const maxRetirementYears = Math.min(MAX_SEARCH_YEARS, Math.max(params.death_age - params.current_age - 1, 0))
 
-  for (let years = 1; years <= MAX_SEARCH_YEARS; years += 1) {
+  for (let years = 1; years <= maxRetirementYears; years += 1) {
     const projected = futureValue(params.current_base, params.monthly_saving, preReturn, years)
     const retireAge = params.current_age + years
     const yearsAfter = Math.max(params.death_age - retireAge, 1)
@@ -104,7 +105,7 @@ function calculateFixedExpenseMode(
     projectedAtRetirement = projected
   }
 
-  const displayYears = yearsToRetire ?? 30
+  const displayYears = yearsToRetire ?? Math.max(maxRetirementYears, 1)
   const retireYear = CURRENT_YEAR + displayYears
   const retireAge = params.current_age + displayYears
   const yearsAfter = Math.max(params.death_age - retireAge, 1)
@@ -117,16 +118,27 @@ function calculateFixedExpenseMode(
   const monthlyAtRetire = params.monthly_expense * (1 + inflation) ** displayYears
   const gap = Math.max(required - projected, 0)
   const progress = required > 0 ? Math.min((projected / required) * 100, 100) : 100
+  const projectionTable: RetirementYearRow[] = [{
+    year: retireYear,
+    age: `${retireAge} 歲`,
+    monthly_expense: Math.round(monthlyAtRetire),
+    annual_expense: Math.round(monthlyAtRetire * 12),
+    investment_return: 0,
+    end_asset: Math.round(projected),
+    depleted: false,
+  }]
 
   return {
-    years_to_retire: yearsToRetire ?? displayYears,
-    retire_year: retireYear,
-    retire_age: retireAge,
+    years_to_retire: yearsToRetire,
+    retire_year: yearsToRetire === null ? null : retireYear,
+    retire_age: yearsToRetire === null ? null : retireAge,
     required,
     gap,
     progress,
     monthly_at_retire: monthlyAtRetire,
-    table: simulateRetirement(required, monthlyAtRetire, inflation, postReturn, retireYear, yearsAfter, retireAge),
+    table: yearsToRetire === null
+      ? projectionTable
+      : simulateRetirement(required, monthlyAtRetire, inflation, postReturn, retireYear, yearsAfter, retireAge),
   }
 }
 
