@@ -19,6 +19,7 @@ test('buildRetirementChartData flags single-point fixed-expense series as needin
 
   assert.equal(chart.showFi4Dot, true)
   assert.equal(chart.showFiltDot, false)
+  assert.equal(chart.fi4Note, '指定月花費模式尚未達成 FI，沒有退休後資產曲線；圖上單點是最後檢查年份的資產投影。')
   assert.ok(chart.data.length > 1)
 })
 
@@ -27,4 +28,5 @@ test('buildRetirementChartData does not show dots for multi-point series', () =>
 
   assert.equal(chart.showFi4Dot, false)
   assert.equal(chart.showFiltDot, false)
+  assert.equal(chart.fi4Note, null)
 })

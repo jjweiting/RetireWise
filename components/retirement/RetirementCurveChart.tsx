@@ -15,14 +15,12 @@ function compactMoney(value: number): string {
 }
 
 export default function RetirementCurveChart({ result }: Props) {
-  const { data, showFi4Dot, showFiltDot } = buildRetirementChartData(result)
+  const { data, showFi4Dot, showFiltDot, fi4Note } = buildRetirementChartData(result)
 
   return (
     <section className="card">
       <h2>退休後資產曲線</h2>
-      {showFi4Dot && (
-        <p className="hint">指定月花費模式尚未達成 FI，因此只顯示最後檢查年份的投影點。</p>
-      )}
+      {fi4Note && <p className="hint">{fi4Note}</p>}
       <div className="chart-wrap">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={data} margin={{ top: 10, right: 20, left: 0, bottom: 4 }}>

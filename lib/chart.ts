@@ -10,6 +10,7 @@ export interface RetirementChartData {
   data: RetirementChartPoint[]
   showFi4Dot: boolean
   showFiltDot: boolean
+  fi4Note: string | null
 }
 
 export function buildRetirementChartData(result: RetirementResult): RetirementChartData {
@@ -31,5 +32,8 @@ export function buildRetirementChartData(result: RetirementResult): RetirementCh
     data: Array.from(byYear.values()).sort((a, b) => a.year - b.year),
     showFi4Dot: fi4PointCount === 1,
     showFiltDot: filtPointCount === 1,
+    fi4Note: fi4PointCount === 1
+      ? '指定月花費模式尚未達成 FI，沒有退休後資產曲線；圖上單點是最後檢查年份的資產投影。'
+      : null,
   }
 }
