@@ -1,0 +1,121 @@
+'use client'
+
+import { useEffect, useState } from 'react'
+import RetirementCurveChart from '@/components/retirement/RetirementCurveChart'
+import RetirementParams from '@/components/retirement/RetirementParams'
+import RetirementScenarioManager from '@/components/retirement/RetirementScenarioManager'
+import RetirementSummaryCards from '@/components/retirement/RetirementSummaryCards'
+import RetirementYearlyTable from '@/components/retirement/RetirementYearlyTable'
+import { calculateRetirementFI, DEFAULT_PARAMS, validateRetirementParams } from '@/lib/retirement'
+import { deleteSavedScenario, loadSavedScenarios, saveSavedScenarios } from '@/lib/storage'
+import type { RetirementParams as RetirementParamsType, RetirementResult, SavedScenario } from '@/lib/types'
+
+function createId(): string {
+  if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) return crypto.randomUUID()
+  return `${Date.now()}-${Math.random().toString(16).slice(2)}`
+}
+
+function calculateSafely(params: RetirementParamsType): RetirementResult | null {
+  try {
+    return calculateRetirementFI(params)
+  } catch {
+    return null
+  }
+}
+
+export default function Home() {
+  const [params, setParams] = useState<RetirementParamsType>(DEFAULT_PARAMS)
+  const [scenarios, setScenarios] = useState<SavedScenario[]>([])
+  const errors = validateRetirementParams(params)
+  const result = errors.length === 0 ? calculateSafely(params) : null
+
+  useEffect(() => {
+    setScenarios(loadSavedScenarios())
+  }, [])
+
+  const updateParams = (updates: Partial<RetirementParamsType>) => {
+    setParams((current) => ({ ...current, ...updates }))
+  }
+
+  const saveScenario = (name: string) => {
+    if (!result) return
+
+    const now = new Date().toISOString()
+    const next: SavedScenario[] = [
+      {
+        id: createId(),
+        name,
+        params,
+        summary: {
+          fi_year: result.fi4.gap <= 0 ? result.fi4.retire_year : null,
+          required_assets: result.fi4.required,
+          max_monthly_spending: result.filt_max_monthly,
+        },
+        created_at: now,
+        updated_at: now,
+      },
+      ...scenarios,
+    ]
+
+    saveSavedScenarios(next)
+    setScenarios(next)
+  }
+
+  const applyScenario = (scenario: SavedScenario) => {
+    setParams(scenario.params)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  const removeScenario = (id: string) => {
+    setScenarios(deleteSavedScenario(id))
+  }
+
+  return (
+    <main className="page">
+      <header className="hero">
+        <div>
+          <p className="eyebrow">RetireWise Public</p>
+          <h1>退休自由，不用猜。</h1>
+          <p className="lead">
+            輸入自己的資產、儲蓄、生活費與報酬假設，快速比較「指定月花費」與「壽命規劃」兩種退休路徑。
+          </p>
+          <div className="badges">
+            <span className="badge">不需登入</span>
+            <span className="badge">不上傳資料</span>
+            <span className="badge">情境存在你的瀏覽器</span>
+          </div>
+        </div>
+        <aside className="disclaimer">
+          本工具僅供退休規劃試算與情境比較，不構成投資、稅務或法律建議。實際退休計畫仍需考量市場波動、稅制、保險與個人現金流。
+        </aside>
+      </header>
+
+      <div className="grid">
+        <RetirementParams params={params} errors={errors} onChange={updateParams} />
+
+        <div className="stack">
+          {result ? (
+            <>
+              <RetirementSummaryCards result={result} params={params} />
+              <RetirementCurveChart result={result} />
+              <RetirementYearlyTable fi4Table={result.fi4.table} filtTable={result.filt.table} />
+            </>
+          ) : (
+            <section className="card">
+              <h2>等待有效輸入</h2>
+              <p className="error">請先修正左側參數，系統會自動重新試算。</p>
+            </section>
+          )}
+
+          <RetirementScenarioManager
+            scenarios={scenarios}
+            canSave={result !== null}
+            onSave={saveScenario}
+            onApply={applyScenario}
+            onDelete={removeScenario}
+          />
+        </div>
+      </div>
+    </main>
+  )
+}
