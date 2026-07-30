@@ -37,8 +37,9 @@ export function calculateEarlySavingComparison(
   const baselineFiYear = baseline.fi4.gap <= 0 ? baseline.fi4.retire_year : null
   const acceleratedFiYear = accelerated.fi4.gap <= 0 ? accelerated.fi4.retire_year : null
   const fiYearDelta = baselineFiYear !== null && acceleratedFiYear !== null ? baselineFiYear - acceleratedFiYear : null
-  const baselineDepletionYear = findDepletionYear(baseline.fi4.table)
-  const acceleratedDepletionYear = findDepletionYear(accelerated.fi4.table)
+  const neitherPlanReachesFi = baselineFiYear === null && acceleratedFiYear === null
+  const baselineDepletionYear = neitherPlanReachesFi ? null : findDepletionYear(baseline.fi4.table)
+  const acceleratedDepletionYear = neitherPlanReachesFi ? null : findDepletionYear(accelerated.fi4.table)
   const depletionYearDelta = baselineDepletionYear !== null && acceleratedDepletionYear !== null
     ? acceleratedDepletionYear - baselineDepletionYear
     : null
@@ -73,9 +74,9 @@ export function calculateEarlySavingComparison(
     baselineEndingAssetAtLifespan,
     acceleratedEndingAssetAtLifespan,
     assetDifferenceAtLifespan,
-    headline: formatHeadline(safeAccelerationYears, safeExtraMonthlySaving, totalExtraContribution, fiYearDelta, depletionYearDelta, baselineFiYear, acceleratedFiYear),
+    headline: formatHeadline(applicableAccelerationYears, safeExtraMonthlySaving, totalExtraContribution, fiYearDelta, depletionYearDelta, baselineFiYear, acceleratedFiYear),
     fiLabel: formatFiLabel(baselineFiYear, acceleratedFiYear, fiYearDelta),
-    depletionLabel: formatDepletionLabel(baselineDepletionYear, acceleratedDepletionYear, depletionYearDelta),
+    depletionLabel: formatDepletionLabel(baselineDepletionYear, acceleratedDepletionYear, depletionYearDelta, neitherPlanReachesFi),
   }
 }
 
@@ -123,7 +124,7 @@ function money(value: number): string {
 }
 
 function formatHeadline(
-  accelerationYears: number,
+  applicableAccelerationYears: number,
   extraMonthlySaving: number,
   totalExtraContribution: number,
   fiYearDelta: number | null,
@@ -131,7 +132,10 @@ function formatHeadline(
   baselineFiYear: number | null,
   acceleratedFiYear: number | null,
 ): string {
-  const prefix = `如果你在前 ${accelerationYears} 年每月多存 ${money(extraMonthlySaving)}，總共多投入 ${money(totalExtraContribution)}。`
+  const prefix = `如果你在前 ${applicableAccelerationYears} 年每月多存 ${money(extraMonthlySaving)}，總共多投入 ${money(totalExtraContribution)}。`
+  if (baselineFiYear === null && acceleratedFiYear === null) {
+    return `${prefix} 在目前假設下，兩種方案皆尚未達成 FI，這筆前期投入主要反映在最後檢查年份的資產差額。`
+  }
   if (baselineFiYear === null && acceleratedFiYear !== null) {
     return `${prefix} 在目前假設下，這筆前期投入可能讓原本尚未達成的 FI 目標變成 ${acceleratedFiYear} 年達成。`
   }
@@ -161,7 +165,9 @@ function formatDepletionLabel(
   baselineDepletionYear: number | null,
   acceleratedDepletionYear: number | null,
   depletionYearDelta: number | null,
+  comparisonUnavailable = false,
 ): string {
+  if (comparisonUnavailable) return '尚無法比較'
   if (baselineDepletionYear === null && acceleratedDepletionYear === null) return '兩者都能支撐到預期壽命'
   if (baselineDepletionYear !== null && acceleratedDepletionYear === null) return '加速後可支撐到預期壽命'
   if (baselineDepletionYear === null && acceleratedDepletionYear !== null) return '加速後仍需檢查耗盡風險'

@@ -38,3 +38,26 @@ test('unavailable depletion comparison is represented safely', () => {
   assert.equal(comparison.depletionYearDelta, null)
   assert.match(comparison.depletionLabel, /尚無法比較|都能支撐/)
 })
+
+test('depletion comparison stays unavailable when neither plan reaches FI', () => {
+  const comparison = calculateEarlySavingComparison({
+    ...DEFAULT_PARAMS,
+    current_base: 0,
+    monthly_saving: 10_000,
+    monthly_expense: 200_000,
+  }, 5, 5_000)
+
+  assert.equal(comparison.baselineFiYear, null)
+  assert.equal(comparison.acceleratedFiYear, null)
+  assert.equal(comparison.depletionYearDelta, null)
+  assert.equal(comparison.depletionLabel, '尚無法比較')
+  assert.doesNotMatch(comparison.headline, /支撐到預期壽命|多支撐/)
+})
+
+test('headline uses capped applicable acceleration years', () => {
+  const comparison = calculateEarlySavingComparison({ ...DEFAULT_PARAMS, current_base: 100_000_000 }, 10, 5_000)
+
+  assert.ok(comparison.applicableAccelerationYears < 10)
+  assert.match(comparison.headline, new RegExp(`前 ${comparison.applicableAccelerationYears} 年每月多存`))
+  assert.doesNotMatch(comparison.headline, /前 10 年每月多存/)
+})
