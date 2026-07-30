@@ -34,6 +34,12 @@ test('parseSharedParams ignores invalid and out-of-range values', () => {
   assert.equal(parsed.name, null)
 })
 
+test('parseSharedParams rejects current assets above 5000萬', () => {
+  const parsed = parseSharedParams('?asset=50000001', DEFAULT_PARAMS)
+
+  assert.equal(parsed.params.current_base, DEFAULT_PARAMS.current_base)
+})
+
 test('serializeSharedParams includes all numeric params and optional name', () => {
   const query = serializeSharedParams(DEFAULT_PARAMS, '基準情境')
   const params = new URLSearchParams(query)

@@ -71,7 +71,7 @@ export default function RetirementParams({ params, errors, onChange }: Props) {
 
       <div className="form-section">
         <p className="form-section-title">資產起點</p>
-        <RangeField label="目前可投資資產" value={params.current_base} min={0} max={500_000_000} step={100_000} unit="元" onChange={(current_base) => onChange({ current_base })} />
+        <RangeField label="目前可投資資產" value={params.current_base} min={0} max={50_000_000} step={100_000} unit="元" onChange={(current_base) => onChange({ current_base })} />
         <RangeField label="每月儲蓄 / 投入" value={params.monthly_saving} min={0} max={1_000_000} step={5_000} unit="元" onChange={(monthly_saving) => onChange({ monthly_saving })} />
       </div>
 

@@ -10,7 +10,7 @@ interface ParamRule {
 }
 
 const PARAM_RULES: ParamRule[] = [
-  { query: 'asset', key: 'current_base', min: 0, max: 500_000_000 },
+  { query: 'asset', key: 'current_base', min: 0, max: 50_000_000 },
   { query: 'saving', key: 'monthly_saving', min: 0, max: 1_000_000 },
   { query: 'expense', key: 'monthly_expense', min: 10_000, max: 300_000 },
   { query: 'age', key: 'current_age', min: 18, max: 90 },
