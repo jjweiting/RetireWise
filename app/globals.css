@@ -494,6 +494,38 @@ th {
   font-size: 0.84rem;
 }
 
+.early-saving-card {
+  background: linear-gradient(135deg, rgba(255, 251, 235, 0.9), rgba(255, 255, 255, 0.88));
+}
+
+.early-saving-controls {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin: 16px 0;
+}
+
+.early-saving-headline {
+  border: 1px solid rgba(180, 83, 9, 0.22);
+  border-radius: 20px;
+  background: rgba(255, 251, 235, 0.8);
+  color: #854d0e;
+  line-height: 1.75;
+  margin: 0 0 14px;
+  padding: 14px;
+}
+
+.early-saving-metrics {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.early-saving-metrics .metric-value {
+  font-size: 1.05rem;
+  letter-spacing: -0.02em;
+}
+
 @media (max-width: 900px) {
   .hero,
   .grid {
@@ -525,6 +557,8 @@ th {
   }
 
   .key-year-grid,
+  .early-saving-controls,
+  .early-saving-metrics,
   .sensitivity-row {
     grid-template-columns: 1fr;
   }

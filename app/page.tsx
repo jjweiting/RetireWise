@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import RetirementCurveChart from '@/components/retirement/RetirementCurveChart'
+import RetirementEarlySavingComparison from '@/components/retirement/RetirementEarlySavingComparison'
 import RetirementKeyYearSummary from '@/components/retirement/RetirementKeyYearSummary'
 import RetirementParams from '@/components/retirement/RetirementParams'
 import RetirementPresetSelector from '@/components/retirement/RetirementPresetSelector'
@@ -34,6 +35,8 @@ export default function Home() {
   const [scenarios, setScenarios] = useState<SavedScenario[]>([])
   const [sharedName, setSharedName] = useState<string | null>(null)
   const [selectedPresetId, setSelectedPresetId] = useState<RetirementPreset['id'] | null>(null)
+  const [accelerationYears, setAccelerationYears] = useState(5)
+  const [extraMonthlySaving, setExtraMonthlySaving] = useState(5_000)
   const [shareUrl, setShareUrl] = useState('')
   const errors = validateRetirementParams(params)
   const result = errors.length === 0 ? calculateSafely(params) : null
@@ -137,6 +140,13 @@ export default function Home() {
             <>
               <RetirementSummaryCards result={result} params={params} />
               <RetirementSensitivity params={params} />
+              <RetirementEarlySavingComparison
+                params={params}
+                accelerationYears={accelerationYears}
+                extraMonthlySaving={extraMonthlySaving}
+                onAccelerationYearsChange={setAccelerationYears}
+                onExtraMonthlySavingChange={setExtraMonthlySaving}
+              />
               <RetirementCurveChart result={result} />
               <RetirementKeyYearSummary fi4Table={result.fi4.table} filtTable={result.filt.table} />
               <RetirementYearlyTable fi4Table={result.fi4.table} filtTable={result.filt.table} />
