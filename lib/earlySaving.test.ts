@@ -61,3 +61,18 @@ test('headline uses capped applicable acceleration years', () => {
   assert.match(comparison.headline, new RegExp(`前 ${comparison.applicableAccelerationYears} 年每月多存`))
   assert.doesNotMatch(comparison.headline, /前 10 年每月多存/)
 })
+
+test('lifespan asset difference uses capped applicable acceleration years', () => {
+  const comparison = calculateEarlySavingComparison({ ...DEFAULT_PARAMS, current_base: 15_000_000 }, 10, 5_000)
+  const cappedComparison = calculateEarlySavingComparison(
+    { ...DEFAULT_PARAMS, current_base: 15_000_000 },
+    comparison.applicableAccelerationYears,
+    5_000,
+  )
+
+  assert.ok(comparison.baselineFiYear !== null)
+  assert.ok(comparison.acceleratedFiYear !== null)
+  assert.ok(comparison.acceleratedFiYear < comparison.baselineFiYear)
+  assert.ok(comparison.applicableAccelerationYears < comparison.accelerationYears)
+  assert.equal(comparison.assetDifferenceAtLifespan, cappedComparison.assetDifferenceAtLifespan)
+})

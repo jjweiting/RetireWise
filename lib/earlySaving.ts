@@ -53,7 +53,7 @@ export function calculateEarlySavingComparison(
   )
   const acceleratedEndingAssetAtLifespan = projectAssetAtLifespan(
     params,
-    projectAssetWithEarlyExtraSaving(params, preReturn, safeAccelerationYears, safeExtraMonthlySaving, assetComparisonYears),
+    projectAssetWithEarlyExtraSaving(params, preReturn, applicableAccelerationYears, safeExtraMonthlySaving, assetComparisonYears),
     assetComparisonYears,
   )
   const assetDifferenceAtLifespan = acceleratedEndingAssetAtLifespan - baselineEndingAssetAtLifespan
