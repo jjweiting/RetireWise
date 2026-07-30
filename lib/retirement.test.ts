@@ -1,6 +1,6 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { calculateRetirementFI, DEFAULT_PARAMS } from './retirement'
+import { calculateRetirementFI, DEFAULT_PARAMS, futureValue } from './retirement'
 
 test('default params produce FI and lifespan results', () => {
   const result = calculateRetirementFI(DEFAULT_PARAMS)
@@ -48,4 +48,20 @@ test('FI is not reached when assets only become sufficient at expected death age
   assert.ok(result.fi4.gap > 0)
   assert.equal(result.fi4.table.length, 1)
   assert.equal(result.fi4.table[0].age, '84 歲')
+})
+
+test('futureValue handles zero and positive annual returns', () => {
+  assert.equal(futureValue(100_000, 10_000, 0, 2), 340_000)
+  assert.ok(futureValue(100_000, 10_000, 0.05, 2) > 340_000)
+})
+
+test('calculateRetirementFI can use a custom asset projection', () => {
+  const baseline = calculateRetirementFI(DEFAULT_PARAMS)
+  const boosted = calculateRetirementFI(DEFAULT_PARAMS, {
+    projectAsset: (years) => futureValue(DEFAULT_PARAMS.current_base, DEFAULT_PARAMS.monthly_saving, DEFAULT_PARAMS.pre_return / 100, years) + 10_000_000,
+  })
+
+  assert.ok(boosted.fi4.years_to_retire !== null)
+  assert.ok(baseline.fi4.years_to_retire !== null)
+  assert.ok(boosted.fi4.years_to_retire <= baseline.fi4.years_to_retire)
 })

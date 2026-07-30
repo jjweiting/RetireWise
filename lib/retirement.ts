@@ -4,6 +4,10 @@ const CURRENT_YEAR = new Date().getFullYear()
 const MAX_SEARCH_YEARS = 60
 const BINARY_SEARCH_MAX_ASSET = 2_000_000_000
 
+export interface RetirementCalculationOptions {
+  projectAsset?: (years: number) => number
+}
+
 export const DEFAULT_PARAMS: RetirementParams = {
   current_base: 3_000_000,
   basis_label: '手動輸入',
@@ -34,7 +38,7 @@ export function validateRetirementParams(params: RetirementParams): string[] {
   return errors
 }
 
-export function calculateRetirementFI(params: RetirementParams): RetirementResult {
+export function calculateRetirementFI(params: RetirementParams, options: RetirementCalculationOptions = {}): RetirementResult {
   const errors = validateRetirementParams(params)
   if (errors.length > 0) {
     throw new Error(errors[0])
@@ -43,12 +47,13 @@ export function calculateRetirementFI(params: RetirementParams): RetirementResul
   const preReturn = params.pre_return / 100
   const postReturn = params.post_return / 100
   const inflation = params.inflation / 100
-  const fixedExpenseMode = calculateFixedExpenseMode(params, preReturn, postReturn, inflation)
+  const projectAsset = options.projectAsset ?? ((years: number) => futureValue(params.current_base, params.monthly_saving, preReturn, years))
+  const fixedExpenseMode = calculateFixedExpenseMode(params, preReturn, postReturn, inflation, projectAsset)
   const yearsToRetire = fixedExpenseMode.years_to_retire ?? 30
   const retireYear = CURRENT_YEAR + yearsToRetire
   const retireAge = params.current_age + yearsToRetire
   const yearsAfterRetirement = Math.max(params.death_age - retireAge, 1)
-  const retirementAsset = futureValue(params.current_base, params.monthly_saving, preReturn, yearsToRetire)
+  const retirementAsset = projectAsset(yearsToRetire)
   const maxMonthly = calculateMaxMonthly(retirementAsset, postReturn, inflation, yearsAfterRetirement, params.bequest)
   const lifespanTable = simulateRetirement(
     retirementAsset,
@@ -82,6 +87,7 @@ function calculateFixedExpenseMode(
   preReturn: number,
   postReturn: number,
   inflation: number,
+  projectAsset: (years: number) => number,
 ): RetirementModeResult {
   let yearsToRetire: number | null = null
   let requiredAtRetirement = 0
@@ -89,7 +95,7 @@ function calculateFixedExpenseMode(
   const maxRetirementYears = Math.min(MAX_SEARCH_YEARS, Math.max(params.death_age - params.current_age - 1, 0))
 
   for (let years = 1; years <= maxRetirementYears; years += 1) {
-    const projected = futureValue(params.current_base, params.monthly_saving, preReturn, years)
+    const projected = projectAsset(years)
     const retireAge = params.current_age + years
     const yearsAfter = Math.max(params.death_age - retireAge, 1)
     const required = findRequiredPrincipal(params.monthly_expense, postReturn, inflation, years, yearsAfter)
@@ -113,7 +119,7 @@ function calculateFixedExpenseMode(
     ? findRequiredPrincipal(params.monthly_expense, postReturn, inflation, displayYears, yearsAfter)
     : requiredAtRetirement
   const projected = yearsToRetire === null
-    ? futureValue(params.current_base, params.monthly_saving, preReturn, displayYears)
+    ? projectAsset(displayYears)
     : projectedAtRetirement
   const monthlyAtRetire = params.monthly_expense * (1 + inflation) ** displayYears
   const gap = Math.max(required - projected, 0)
@@ -142,7 +148,7 @@ function calculateFixedExpenseMode(
   }
 }
 
-function futureValue(currentBase: number, monthlySaving: number, annualReturn: number, years: number): number {
+export function futureValue(currentBase: number, monthlySaving: number, annualReturn: number, years: number): number {
   const annualSaving = monthlySaving * 12
   if (annualReturn === 0) {
     return currentBase + annualSaving * years
