@@ -30,10 +30,9 @@ export const RETIREMENT_PRESETS: RetirementPreset[] = [
   {
     id: 'aggressive',
     name: '積極',
-    description: '提高投入與退休前報酬假設。',
+    description: '提高退休前報酬、降低通膨假設。',
     params: {
       ...DEFAULT_PARAMS,
-      monthly_saving: 50_000,
       pre_return: 9,
       post_return: 5,
       inflation: 2.5,

@@ -55,7 +55,12 @@ export default function Home() {
 
   const applyPreset = (presetParams: RetirementParamsType) => {
     setSharedName(null)
-    setParams(presetParams)
+    setParams((current) => ({
+      ...presetParams,
+      current_base: current.current_base,
+      monthly_saving: current.monthly_saving,
+      basis_label: current.basis_label,
+    }))
   }
 
   const saveScenario = (name: string) => {
