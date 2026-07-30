@@ -1,0 +1,40 @@
+import test from 'node:test'
+import assert from 'node:assert/strict'
+import { calculateEarlySavingComparison } from './earlySaving'
+import { DEFAULT_PARAMS } from './retirement'
+
+test('extra early saving increases lifespan ending assets', () => {
+  const comparison = calculateEarlySavingComparison(DEFAULT_PARAMS, 5, 5_000)
+
+  assert.ok(comparison.assetDifferenceAtLifespan > 0)
+  assert.ok(comparison.acceleratedEndingAssetAtLifespan > comparison.baselineEndingAssetAtLifespan)
+})
+
+test('total extra contribution uses acceleration years and monthly amount', () => {
+  const comparison = calculateEarlySavingComparison(DEFAULT_PARAMS, 5, 5_000)
+
+  assert.equal(comparison.totalExtraContribution, 300_000)
+})
+
+test('total extra contribution is capped by applicable pre-retirement years', () => {
+  const comparison = calculateEarlySavingComparison({ ...DEFAULT_PARAMS, current_base: 100_000_000 }, 10, 5_000)
+
+  assert.equal(comparison.totalExtraContribution, comparison.applicableAccelerationYears * 12 * 5_000)
+  assert.ok(comparison.applicableAccelerationYears <= 10)
+})
+
+test('accelerated saving does not make FI later when both plans reach FI', () => {
+  const comparison = calculateEarlySavingComparison(DEFAULT_PARAMS, 5, 20_000)
+
+  assert.ok(comparison.baselineFiYear !== null)
+  assert.ok(comparison.acceleratedFiYear !== null)
+  assert.ok(comparison.fiYearDelta !== null)
+  assert.ok(comparison.fiYearDelta >= 0)
+})
+
+test('unavailable depletion comparison is represented safely', () => {
+  const comparison = calculateEarlySavingComparison({ ...DEFAULT_PARAMS, current_base: 100_000_000 }, 5, 5_000)
+
+  assert.equal(comparison.depletionYearDelta, null)
+  assert.match(comparison.depletionLabel, /尚無法比較|都能支撐/)
+})
