@@ -43,7 +43,7 @@ export default function RetirementSummaryCards({ result, params }: Props) {
         <div className="metric">
           <div className="metric-label">資產起點</div>
           <p className="metric-value">{money(params.current_base)}</p>
-          <p className="metric-subtext">每月投入 {money(params.monthly_saving)}</p>
+          <p className="metric-subtext">退休前每月投入 {money(params.monthly_saving)}</p>
         </div>
         <div className="metric">
           <div className="metric-label">假設條件</div>
