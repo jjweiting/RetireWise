@@ -39,3 +39,18 @@ export const RETIREMENT_PRESETS: RetirementPreset[] = [
     },
   },
 ]
+
+const PRESET_CONTROLLED_KEYS: Array<keyof RetirementParams> = [
+  'monthly_expense',
+  'pre_return',
+  'post_return',
+  'inflation',
+  'withdrawal_rate',
+  'bequest',
+  'current_age',
+  'death_age',
+]
+
+export function touchesPresetControlledParams(updates: Partial<RetirementParams>): boolean {
+  return PRESET_CONTROLLED_KEYS.some((key) => key in updates)
+}

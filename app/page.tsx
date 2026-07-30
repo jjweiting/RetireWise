@@ -10,6 +10,7 @@ import RetirementSensitivity from '@/components/retirement/RetirementSensitivity
 import RetirementSharePanel from '@/components/retirement/RetirementSharePanel'
 import RetirementSummaryCards from '@/components/retirement/RetirementSummaryCards'
 import RetirementYearlyTable from '@/components/retirement/RetirementYearlyTable'
+import { touchesPresetControlledParams, type RetirementPreset } from '@/lib/presets'
 import { calculateRetirementFI, DEFAULT_PARAMS, validateRetirementParams } from '@/lib/retirement'
 import { buildShareUrl, parseSharedParams } from '@/lib/share'
 import { deleteSavedScenario, loadSavedScenarios, saveSavedScenarios } from '@/lib/storage'
@@ -32,6 +33,7 @@ export default function Home() {
   const [params, setParams] = useState<RetirementParamsType>(DEFAULT_PARAMS)
   const [scenarios, setScenarios] = useState<SavedScenario[]>([])
   const [sharedName, setSharedName] = useState<string | null>(null)
+  const [selectedPresetId, setSelectedPresetId] = useState<RetirementPreset['id'] | null>(null)
   const [shareUrl, setShareUrl] = useState('')
   const errors = validateRetirementParams(params)
   const result = errors.length === 0 ? calculateSafely(params) : null
@@ -50,13 +52,15 @@ export default function Home() {
 
   const updateParams = (updates: Partial<RetirementParamsType>) => {
     setSharedName(null)
+    if (touchesPresetControlledParams(updates)) setSelectedPresetId(null)
     setParams((current) => ({ ...current, ...updates }))
   }
 
-  const applyPreset = (presetParams: RetirementParamsType) => {
+  const applyPreset = (preset: RetirementPreset) => {
     setSharedName(null)
+    setSelectedPresetId(preset.id)
     setParams((current) => ({
-      ...presetParams,
+      ...preset.params,
       current_base: current.current_base,
       monthly_saving: current.monthly_saving,
       basis_label: current.basis_label,
@@ -94,6 +98,7 @@ export default function Home() {
   }
 
   const applyScenario = (scenario: SavedScenario) => {
+    setSelectedPresetId(null)
     setParams(scenario.params)
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
@@ -123,7 +128,7 @@ export default function Home() {
 
       <div className="grid">
         <div className="stack">
-          <RetirementPresetSelector onApply={applyPreset} />
+          <RetirementPresetSelector selectedPresetId={selectedPresetId} onApply={applyPreset} />
           <RetirementParams params={params} errors={errors} onChange={updateParams} />
         </div>
 

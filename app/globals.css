@@ -358,6 +358,28 @@ th {
   font-weight: 850;
 }
 
+.preset-button-selected {
+  border-color: rgba(15, 118, 110, 0.72);
+  background: linear-gradient(135deg, rgba(20, 184, 166, 0.2), rgba(255, 255, 255, 0.9));
+  box-shadow: 0 12px 24px rgba(15, 118, 110, 0.14);
+}
+
+.preset-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.preset-selected-label {
+  border-radius: 999px;
+  background: var(--brand-dark);
+  color: white !important;
+  padding: 3px 8px;
+  font-size: 0.74rem;
+  font-weight: 800;
+}
+
 .preset-button small {
   color: var(--muted);
   line-height: 1.45;
