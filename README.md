@@ -58,7 +58,7 @@ npm run build
 
 若之後想銜接 Firebase Hosting，也可以直接把 `out/` 作為 public directory。Phase 1 不需要 Firebase Auth 或 Firestore。
 
-## Phase 1 功能
+## 功能
 
 - 指定月花費模式：設定退休後目標月花費，估算 FI 年份、退休年齡、所需資產、缺口與進度。
 - 壽命規劃模式：設定預期壽命與死亡時目標剩餘，逆推可支撐的最大月花費。
