@@ -623,25 +623,13 @@ th {
     order: -1;
   }
 
-  .summary-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .market-stress-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
-@media (max-width: 620px) {
   .page {
-    width: min(100% - 20px, 1180px);
-    padding-top: 22px;
     padding-bottom: 132px;
   }
 
   .mobile-live-status {
     position: fixed;
-    z-index: 10;
+    z-index: 100;
     right: 10px;
     bottom: 10px;
     left: 10px;
@@ -675,6 +663,21 @@ th {
     font-size: 0.92rem;
     text-overflow: ellipsis;
     white-space: nowrap;
+  }
+
+  .summary-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .market-stress-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 620px) {
+  .page {
+    width: min(100% - 20px, 1180px);
+    padding-top: 22px;
   }
 
   .card {
