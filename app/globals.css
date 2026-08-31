@@ -125,6 +125,10 @@ h1 {
   margin-bottom: -8px;
 }
 
+.mobile-live-status {
+  display: none;
+}
+
 .studio-layout {
   display: grid;
   grid-template-columns: minmax(300px, 360px) minmax(0, 1fr);
@@ -632,6 +636,45 @@ th {
   .page {
     width: min(100% - 20px, 1180px);
     padding-top: 22px;
+    padding-bottom: 132px;
+  }
+
+  .mobile-live-status {
+    position: fixed;
+    z-index: 10;
+    right: 10px;
+    bottom: 10px;
+    left: 10px;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+    border: 1px solid rgba(15, 118, 110, 0.28);
+    border-radius: 18px;
+    background: rgba(15, 94, 89, 0.94);
+    box-shadow: 0 16px 34px rgba(15, 23, 42, 0.24);
+    color: white;
+    padding: 11px 12px;
+    backdrop-filter: blur(16px);
+  }
+
+  .mobile-live-status div {
+    display: grid;
+    gap: 3px;
+    min-width: 0;
+  }
+
+  .mobile-live-status span {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.7rem;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+
+  .mobile-live-status strong {
+    overflow: hidden;
+    font-size: 0.92rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .card {

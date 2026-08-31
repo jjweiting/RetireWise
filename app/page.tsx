@@ -5,6 +5,7 @@ import RetirementCurveChart from '@/components/retirement/RetirementCurveChart'
 import RetirementEarlySavingComparison from '@/components/retirement/RetirementEarlySavingComparison'
 import RetirementKeyYearSummary from '@/components/retirement/RetirementKeyYearSummary'
 import RetirementMarketStress from '@/components/retirement/RetirementMarketStress'
+import RetirementMobileStatus from '@/components/retirement/RetirementMobileStatus'
 import RetirementParams from '@/components/retirement/RetirementParams'
 import RetirementPresetSelector from '@/components/retirement/RetirementPresetSelector'
 import RetirementScenarioManager from '@/components/retirement/RetirementScenarioManager'
@@ -169,6 +170,7 @@ export default function Home() {
           />
         </div>
       </div>
+      {result && <RetirementMobileStatus result={result} params={params} />}
     </main>
   )
 }

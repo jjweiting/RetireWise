@@ -17,3 +17,9 @@ test('home page presents the scenario studio as the primary workspace', () => {
   assert.match(page, /情境工作台/)
   assert.match(page, /studio-live-results/)
 })
+
+test('mobile layout keeps an immediate retirement status visible', () => {
+  const page = readFileSync('app/page.tsx', 'utf8')
+
+  assert.match(page, /RetirementMobileStatus/)
+})
