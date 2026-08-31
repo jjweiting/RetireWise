@@ -181,9 +181,11 @@ export default function Home() {
         </aside>
         <div className="studio-canvas stack">
           {result ? <>
+            <div className="studio-live-results">
+              <RetirementSummaryCards result={result} params={params} />
+              <RetirementMarketStress result={result} params={params} />
+            </div>
             <RetirementCurveChart result={result} />
-            <RetirementSummaryCards result={result} params={params} />
-            <RetirementMarketStress result={result} params={params} />
             <RetirementSensitivity params={params} />
             <RetirementEarlySavingComparison
               params={params}
