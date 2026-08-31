@@ -16,8 +16,7 @@ export default function RetirementMarketStress({ params, result }: Props) {
   const stress = calculateHistoricalMarketStress(params, result.fi4.required, result.fi4.years_to_retire)
   if (!stress) return null
 
-  const extraAsset = Math.max(stress.requiredAsset - result.fi4.required, 0)
-  const survives = stress.depletedAge === null
+  const percentileExtraAsset = Math.max(stress.percentileRequiredAsset - result.fi4.required, 0)
 
   return (
     <section className="card market-stress-card">
@@ -25,22 +24,27 @@ export default function RetirementMarketStress({ params, result }: Props) {
       <p className="hint">以 1926-2025 年美國大型股年總報酬的每個連續期間測試退休後報酬順序。保留你設定的平均報酬率，只套用歷史漲跌節奏。</p>
       <div className="market-stress-grid">
         <div className="metric">
-          <div className="metric-label">最不利起始年</div>
-          <p className="metric-value">{stress.startYear}</p>
-          <p className="metric-subtext">退休期間最差的歷史報酬序列</p>
+          <div className="metric-label">歷史存活率</div>
+          <p className="metric-value">{Math.round(stress.successRate * 100)}%</p>
+          <p className="metric-subtext">{stress.sampleCount} 段歷史報酬序列中，資產未耗盡的比例</p>
         </div>
         <div className="metric">
-          <div className="metric-label">壓力測試結果</div>
-          <p className="metric-value">{survives ? '可維持' : `${stress.depletedAge} 歲耗盡`}</p>
-          <p className="metric-subtext">以目前 FI 所需資產 {money(result.fi4.required)} 試算</p>
+          <div className="metric-label">典型失敗年齡</div>
+          <p className="metric-value">{stress.medianDepletedAge === null ? '無' : `${stress.medianDepletedAge} 歲`}</p>
+          <p className="metric-subtext">僅統計會耗盡的序列之中位數</p>
         </div>
         <div className="metric">
-          <div className="metric-label">避免耗盡所需資產</div>
-          <p className="metric-value">{money(stress.requiredAsset)}</p>
-          <p className="metric-subtext">較基本試算多 {money(extraAsset)}</p>
+          <div className="metric-label">90% 情境所需資產</div>
+          <p className="metric-value">{money(stress.percentileRequiredAsset)}</p>
+          <p className="metric-subtext">較基本試算多 {money(percentileExtraAsset)}</p>
+        </div>
+        <div className="metric">
+          <div className="metric-label">最極端歷史情境</div>
+          <p className="metric-value">{stress.worstStartYear}</p>
+          <p className="metric-subtext">需 {money(stress.worstRequiredAsset)} 才能維持至壽命終點</p>
         </div>
       </div>
-      <p className="hint market-stress-note">此為 100 年美股歷史資料的壓力測試，並非預測；債券、現金或全球分散配置的實際波動可能不同。</p>
+      <p className="hint market-stress-note">90% 情境比單一最差年份更適合用來設定準備金；最極端情境僅作尾端風險參考。此為 100 年美股資料，並非預測。</p>
     </section>
   )
 }

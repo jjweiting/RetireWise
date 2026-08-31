@@ -18,10 +18,12 @@ const FIRST_YEAR = 1926
 const HISTORICAL_AVERAGE = HISTORICAL_STOCK_RETURNS.reduce((sum, value) => sum + value, 0) / HISTORICAL_STOCK_RETURNS.length
 
 export interface HistoricalMarketStressResult {
-  startYear: number
-  depletedAge: number | null
-  endingAsset: number
-  requiredAsset: number
+  sampleCount: number
+  successRate: number
+  medianDepletedAge: number | null
+  percentileRequiredAsset: number
+  worstStartYear: number
+  worstRequiredAsset: number
 }
 
 function simulate(
@@ -71,7 +73,7 @@ export function calculateHistoricalMarketStress(
   const monthlyExpenseAtRetirement = params.monthly_expense * (1 + params.inflation / 100) ** yearsToRetire
   const expectedReturn = params.post_return / 100
   const inflation = params.inflation / 100
-  let worst: HistoricalMarketStressResult | null = null
+  const samples: { startYear: number; depletedAge: number | null; requiredAsset: number; succeeds: boolean }[] = []
 
   for (let start = 0; start <= HISTORICAL_STOCK_RETURNS.length - retirementYears; start += 1) {
     // Keep the user's expected return, but apply the sequence of historical gains and crashes.
@@ -80,17 +82,27 @@ export function calculateHistoricalMarketStress(
       .map((returnPercent) => Math.max(expectedReturn + (returnPercent - HISTORICAL_AVERAGE) / 100, -0.99))
     const outcome = simulate(retirementAsset, returns, monthlyExpenseAtRetirement, inflation)
     const requiredAsset = requiredToAvoidDepletion(returns, monthlyExpenseAtRetirement, inflation, params.bequest)
-    const candidate: HistoricalMarketStressResult = {
+    samples.push({
       startYear: FIRST_YEAR + start,
       depletedAge: outcome.depletedYear === null ? null : params.current_age + yearsToRetire + outcome.depletedYear,
-      endingAsset: outcome.endingAsset,
       requiredAsset,
-    }
-
-    if (!worst || candidate.endingAsset < worst.endingAsset || (candidate.endingAsset === worst.endingAsset && candidate.requiredAsset > worst.requiredAsset)) {
-      worst = candidate
-    }
+      succeeds: outcome.depletedYear === null && outcome.endingAsset >= params.bequest,
+    })
   }
 
-  return worst
+  const requiredAssets = samples.map((sample) => sample.requiredAsset).sort((left, right) => left - right)
+  const depletedAges = samples
+    .flatMap((sample) => sample.depletedAge === null ? [] : [sample.depletedAge])
+    .sort((left, right) => left - right)
+  const worst = samples.reduce((currentWorst, sample) => sample.requiredAsset > currentWorst.requiredAsset ? sample : currentWorst)
+  const percentileIndex = Math.ceil(requiredAssets.length * 0.9) - 1
+
+  return {
+    sampleCount: samples.length,
+    successRate: samples.filter((sample) => sample.succeeds).length / samples.length,
+    medianDepletedAge: depletedAges.length === 0 ? null : depletedAges[Math.floor(depletedAges.length / 2)],
+    percentileRequiredAsset: requiredAssets[percentileIndex],
+    worstStartYear: worst.startYear,
+    worstRequiredAsset: worst.requiredAsset,
+  }
 }
