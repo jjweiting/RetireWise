@@ -9,7 +9,9 @@ test('historical stress test identifies a valid historical sequence', () => {
   assert.ok(result)
   assert.ok(result.worstStartYear >= 1926)
   assert.ok(result.successRate >= 0 && result.successRate <= 1)
+  assert.ok(result.percentile75RequiredAsset > 0)
   assert.ok(result.percentileRequiredAsset > 0)
+  assert.ok(result.percentileRequiredAsset >= result.percentile75RequiredAsset)
   assert.ok(result.worstRequiredAsset >= result.percentileRequiredAsset)
 })
 

@@ -1,4 +1,5 @@
 import type { RetirementModeResult, RetirementParams, RetirementResult, RetirementYearRow } from './types'
+import { calculateHistoricalRequiredAsset } from './marketStress'
 
 const CURRENT_YEAR = new Date().getFullYear()
 const MAX_SEARCH_YEARS = 60
@@ -20,6 +21,7 @@ export const DEFAULT_PARAMS: RetirementParams = {
   current_age: 32,
   death_age: 85,
   monthly_saving: 30_000,
+  market_stress_level: 'baseline',
 }
 
 export function validateRetirementParams(params: RetirementParams): string[] {
@@ -98,7 +100,7 @@ function calculateFixedExpenseMode(
     const projected = projectAsset(years)
     const retireAge = params.current_age + years
     const yearsAfter = Math.max(params.death_age - retireAge, 1)
-    const required = findRequiredPrincipal(params.monthly_expense, postReturn, inflation, years, yearsAfter)
+    const required = requiredAssetForSafetyLevel(params, postReturn, inflation, years, yearsAfter)
 
     if (projected >= required) {
       yearsToRetire = years
@@ -116,7 +118,7 @@ function calculateFixedExpenseMode(
   const retireAge = params.current_age + displayYears
   const yearsAfter = Math.max(params.death_age - retireAge, 1)
   const required = yearsToRetire === null
-    ? findRequiredPrincipal(params.monthly_expense, postReturn, inflation, displayYears, yearsAfter)
+    ? requiredAssetForSafetyLevel(params, postReturn, inflation, displayYears, yearsAfter)
     : requiredAtRetirement
   const projected = yearsToRetire === null
     ? projectAsset(displayYears)
@@ -146,6 +148,23 @@ function calculateFixedExpenseMode(
       ? projectionTable
       : simulateRetirement(required, monthlyAtRetire, inflation, postReturn, retireYear, yearsAfter, retireAge),
   }
+}
+
+function requiredAssetForSafetyLevel(
+  params: RetirementParams,
+  postReturn: number,
+  inflation: number,
+  yearsToRetire: number,
+  yearsAfterRetirement: number,
+): number {
+  if (params.market_stress_level === 'baseline') {
+    return findRequiredPrincipal(params.monthly_expense, postReturn, inflation, yearsToRetire, yearsAfterRetirement)
+  }
+
+  const historicalRequired = calculateHistoricalRequiredAsset(params, yearsToRetire, params.market_stress_level)
+  return Number.isFinite(historicalRequired)
+    ? historicalRequired
+    : findRequiredPrincipal(params.monthly_expense, postReturn, inflation, yearsToRetire, yearsAfterRetirement)
 }
 
 export function futureValue(currentBase: number, monthlySaving: number, annualReturn: number, years: number): number {

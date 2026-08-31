@@ -68,6 +68,7 @@ export default function Home() {
       current_base: current.current_base,
       monthly_saving: current.monthly_saving,
       basis_label: current.basis_label,
+      market_stress_level: current.market_stress_level,
     }))
   }
 
@@ -103,7 +104,7 @@ export default function Home() {
 
   const applyScenario = (scenario: SavedScenario) => {
     setSelectedPresetId(null)
-    setParams(scenario.params)
+    setParams({ ...DEFAULT_PARAMS, ...scenario.params })
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 

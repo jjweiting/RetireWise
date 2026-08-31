@@ -21,7 +21,7 @@ export default function RetirementMarketStress({ params, result }: Props) {
   return (
     <section className="card market-stress-card">
       <h2>歷史市場壓力測試</h2>
-      <p className="hint">以 1926-2025 年美國大型股年總報酬的每個連續期間測試退休後報酬順序。保留你設定的平均報酬率，只套用歷史漲跌節奏。</p>
+      <p className="hint">以 1926-2025 年美國大型股年總報酬的每個連續期間測試退休後報酬順序。保留你設定的平均報酬率，只套用歷史漲跌節奏；上方 FI 結果已依所選安全等級計算。</p>
       <div className="market-stress-grid">
         <div className="metric">
           <div className="metric-label">歷史存活率</div>

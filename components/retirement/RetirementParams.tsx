@@ -91,10 +91,26 @@ export default function RetirementParams({ params, errors, onChange }: Props) {
 
       <div className="form-section">
         <p className="form-section-title">模式專屬參數</p>
+        <label className="field">
+          <span className="field-row">
+            <span>退休安全等級</span>
+            <span>{safetyLevelLabel(params.market_stress_level)}</span>
+          </span>
+          <select value={params.market_stress_level} onChange={(event) => onChange({ market_stress_level: event.target.value as RetirementParamsType['market_stress_level'] })}>
+            <option value="baseline">基本：固定報酬率</option>
+            <option value="historical75">穩健：75% 歷史情境</option>
+            <option value="historical90">保守：90% 歷史情境</option>
+            <option value="historicalWorst">極端：最差歷史情境</option>
+          </select>
+        </label>
         <RangeField label="安全提領率參考" value={params.withdrawal_rate} min={2} max={6} step={0.5} unit="%" onChange={(withdrawal_rate) => onChange({ withdrawal_rate })} />
         <NumberField label="死亡時目標剩餘" value={params.bequest} min={0} max={100_000_000} step={500_000} unit="元" onChange={(bequest) => onChange({ bequest })} />
-        <p className="hint">安全提領率作為參考輸入保留；目前 FI 門檻以逐年退休後模擬與壽命終點計算。</p>
+        <p className="hint">安全等級會直接影響 FI 年份與所需資產。75% / 90% 指能通過該比例的歷史報酬序列；安全提領率作為參考輸入保留。</p>
       </div>
     </section>
   )
+}
+
+function safetyLevelLabel(level: RetirementParamsType['market_stress_level']): string {
+  return { baseline: '基本', historical75: '穩健', historical90: '保守', historicalWorst: '極端' }[level]
 }

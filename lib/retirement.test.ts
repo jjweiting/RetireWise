@@ -23,6 +23,15 @@ test('higher monthly expense increases required assets', () => {
   assert.ok(high.fi4.required > low.fi4.required)
 })
 
+test('higher historical safety level does not advance FI', () => {
+  const baseline = calculateRetirementFI({ ...DEFAULT_PARAMS, market_stress_level: 'baseline' })
+  const conservative = calculateRetirementFI({ ...DEFAULT_PARAMS, market_stress_level: 'historical90' })
+
+  if (baseline.fi4.years_to_retire !== null) {
+    assert.ok(conservative.fi4.years_to_retire === null || conservative.fi4.years_to_retire >= baseline.fi4.years_to_retire)
+  }
+})
+
 test('bequest reduces lifespan-mode max monthly spending', () => {
   const noBequest = calculateRetirementFI({ ...DEFAULT_PARAMS, bequest: 0 })
   const withBequest = calculateRetirementFI({ ...DEFAULT_PARAMS, bequest: 3000000 })

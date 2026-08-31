@@ -5,7 +5,7 @@ import { buildShareUrl, parseSharedParams, serializeSharedParams } from './share
 
 test('parseSharedParams maps valid query values into params and name', () => {
   const parsed = parseSharedParams(
-    '?asset=5000000&saving=45000&expense=80000&age=35&life=90&pre=8.5&post=4.5&inflation=2.5&withdrawal=3.5&bequest=1000000&name=%E4%BF%9D%E5%AE%88%E9%80%80%E4%BC%91',
+    '?asset=5000000&saving=45000&expense=80000&age=35&life=90&pre=8.5&post=4.5&inflation=2.5&withdrawal=3.5&bequest=1000000&safety=historical90&name=%E4%BF%9D%E5%AE%88%E9%80%80%E4%BC%91',
     DEFAULT_PARAMS,
   )
 
@@ -19,6 +19,7 @@ test('parseSharedParams maps valid query values into params and name', () => {
   assert.equal(parsed.params.inflation, 2.5)
   assert.equal(parsed.params.withdrawal_rate, 3.5)
   assert.equal(parsed.params.bequest, 1_000_000)
+  assert.equal(parsed.params.market_stress_level, 'historical90')
   assert.equal(parsed.name, '保守退休')
 })
 
@@ -54,6 +55,7 @@ test('serializeSharedParams includes all numeric params and optional name', () =
   assert.equal(params.get('inflation'), String(DEFAULT_PARAMS.inflation))
   assert.equal(params.get('withdrawal'), String(DEFAULT_PARAMS.withdrawal_rate))
   assert.equal(params.get('bequest'), String(DEFAULT_PARAMS.bequest))
+  assert.equal(params.get('safety'), DEFAULT_PARAMS.market_stress_level)
   assert.equal(params.get('name'), '基準情境')
 })
 

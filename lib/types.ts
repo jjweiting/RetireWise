@@ -1,3 +1,5 @@
+export type MarketStressLevel = 'baseline' | 'historical75' | 'historical90' | 'historicalWorst'
+
 export interface RetirementParams {
   current_base: number
   basis_label: string
@@ -10,6 +12,7 @@ export interface RetirementParams {
   current_age: number
   death_age: number
   monthly_saving: number
+  market_stress_level: MarketStressLevel
 }
 
 export interface RetirementYearRow {

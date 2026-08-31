@@ -1,4 +1,4 @@
-import type { RetirementParams } from './types'
+import type { MarketStressLevel, RetirementParams } from './types'
 
 // S&P 500 annual total returns, 1926-2025 (%). Source: NYU Stern historical returns data.
 const HISTORICAL_STOCK_RETURNS = [
@@ -21,6 +21,7 @@ export interface HistoricalMarketStressResult {
   sampleCount: number
   successRate: number
   medianDepletedAge: number | null
+  percentile75RequiredAsset: number
   percentileRequiredAsset: number
   worstStartYear: number
   worstRequiredAsset: number
@@ -49,17 +50,27 @@ function requiredToAvoidDepletion(
   inflation: number,
   bequest: number,
 ): number {
-  let low = 0
-  let high = 2_000_000_000
+  let required = bequest
 
-  for (let iteration = 0; iteration < 50; iteration += 1) {
-    const middle = (low + high) / 2
-    const outcome = simulate(middle, returns, monthlyExpenseAtRetirement, inflation)
-    if (outcome.depletedYear === null && outcome.endingAsset >= bequest) high = middle
-    else low = middle
+  for (let year = returns.length - 1; year >= 0; year -= 1) {
+    const expense = monthlyExpenseAtRetirement * (1 + inflation) ** year * 12
+    required = (required + expense) / (1 + returns[year])
   }
 
-  return high
+  return Math.max(required, 0)
+}
+
+export function calculateHistoricalRequiredAsset(
+  params: RetirementParams,
+  yearsToRetire: number,
+  level: Exclude<MarketStressLevel, 'baseline'>,
+): number {
+  const stress = calculateHistoricalMarketStress(params, 0, yearsToRetire)
+  if (!stress) return Number.POSITIVE_INFINITY
+
+  if (level === 'historical75') return stress.percentile75RequiredAsset
+  if (level === 'historical90') return stress.percentileRequiredAsset
+  return stress.worstRequiredAsset
 }
 
 export function calculateHistoricalMarketStress(
@@ -95,12 +106,14 @@ export function calculateHistoricalMarketStress(
     .flatMap((sample) => sample.depletedAge === null ? [] : [sample.depletedAge])
     .sort((left, right) => left - right)
   const worst = samples.reduce((currentWorst, sample) => sample.requiredAsset > currentWorst.requiredAsset ? sample : currentWorst)
+  const percentile75Index = Math.ceil(requiredAssets.length * 0.75) - 1
   const percentileIndex = Math.ceil(requiredAssets.length * 0.9) - 1
 
   return {
     sampleCount: samples.length,
     successRate: samples.filter((sample) => sample.succeeds).length / samples.length,
     medianDepletedAge: depletedAges.length === 0 ? null : depletedAges[Math.floor(depletedAges.length / 2)],
+    percentile75RequiredAsset: requiredAssets[percentile75Index],
     percentileRequiredAsset: requiredAssets[percentileIndex],
     worstStartYear: worst.startYear,
     worstRequiredAsset: worst.requiredAsset,

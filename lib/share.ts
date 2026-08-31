@@ -1,6 +1,6 @@
-import type { RetirementParams } from './types'
+import type { MarketStressLevel, RetirementParams } from './types'
 
-type NumericParamKey = Exclude<keyof RetirementParams, 'basis_label'>
+type NumericParamKey = Exclude<keyof RetirementParams, 'basis_label' | 'market_stress_level'>
 
 interface ParamRule {
   query: string
@@ -22,6 +22,8 @@ const PARAM_RULES: ParamRule[] = [
   { query: 'bequest', key: 'bequest', min: 0, max: 100_000_000 },
 ]
 
+const MARKET_STRESS_LEVELS: MarketStressLevel[] = ['baseline', 'historical75', 'historical90', 'historicalWorst']
+
 export interface ParsedSharedParams {
   params: RetirementParams
   name: string | null
@@ -41,6 +43,11 @@ export function parseSharedParams(search: string, defaults: RetirementParams): P
     params[rule.key] = value
   }
 
+  const marketStressLevel = urlParams.get('safety')
+  if (marketStressLevel && MARKET_STRESS_LEVELS.includes(marketStressLevel as MarketStressLevel)) {
+    params.market_stress_level = marketStressLevel as MarketStressLevel
+  }
+
   const rawName = urlParams.get('name')?.trim()
   return { params, name: rawName ? rawName.slice(0, 80) : null }
 }
@@ -51,6 +58,7 @@ export function serializeSharedParams(params: RetirementParams, name?: string | 
   for (const rule of PARAM_RULES) {
     urlParams.set(rule.query, String(params[rule.key]))
   }
+  urlParams.set('safety', params.market_stress_level)
 
   const cleanName = name?.trim()
   if (cleanName) urlParams.set('name', cleanName.slice(0, 80))
