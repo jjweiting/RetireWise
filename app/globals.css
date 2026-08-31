@@ -219,6 +219,22 @@ h1 {
   gap: 12px;
 }
 
+.market-stress-card {
+  border-color: rgba(180, 35, 24, 0.2);
+  background: linear-gradient(135deg, rgba(255, 241, 240, 0.9), rgba(255, 255, 255, 0.88));
+}
+
+.market-stress-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.market-stress-note {
+  margin-top: 14px;
+}
+
 .metric {
   border: 1px solid var(--line);
   border-radius: 20px;
@@ -535,6 +551,10 @@ th {
   .summary-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+
+  .market-stress-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 @media (max-width: 620px) {
@@ -549,6 +569,10 @@ th {
   }
 
   .summary-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .market-stress-grid {
     grid-template-columns: 1fr;
   }
 

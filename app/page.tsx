@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import RetirementCurveChart from '@/components/retirement/RetirementCurveChart'
 import RetirementEarlySavingComparison from '@/components/retirement/RetirementEarlySavingComparison'
 import RetirementKeyYearSummary from '@/components/retirement/RetirementKeyYearSummary'
+import RetirementMarketStress from '@/components/retirement/RetirementMarketStress'
 import RetirementParams from '@/components/retirement/RetirementParams'
 import RetirementPresetSelector from '@/components/retirement/RetirementPresetSelector'
 import RetirementScenarioManager from '@/components/retirement/RetirementScenarioManager'
@@ -139,6 +140,7 @@ export default function Home() {
           {result ? (
             <>
               <RetirementSummaryCards result={result} params={params} />
+              <RetirementMarketStress result={result} params={params} />
               <RetirementSensitivity params={params} />
               <RetirementEarlySavingComparison
                 params={params}
