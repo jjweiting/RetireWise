@@ -5,12 +5,12 @@ import { buildShareUrl, parseSharedParams, serializeSharedParams } from './share
 
 test('parseSharedParams maps valid query values into params and name', () => {
   const parsed = parseSharedParams(
-    '?asset=5000000&saving=45000&expense=80000&age=35&life=90&pre=8.5&post=4.5&inflation=2.5&withdrawal=3.5&bequest=1000000&safety=historical90&name=%E4%BF%9D%E5%AE%88%E9%80%80%E4%BC%91',
+    '?asset=5000000&saving=40000&expense=80000&age=35&life=90&pre=8.5&post=4.5&inflation=2.5&withdrawal=3.5&bequest=1000000&safety=historical90&name=%E4%BF%9D%E5%AE%88%E9%80%80%E4%BC%91',
     DEFAULT_PARAMS,
   )
 
   assert.equal(parsed.params.current_base, 5_000_000)
-  assert.equal(parsed.params.monthly_saving, 45_000)
+  assert.equal(parsed.params.monthly_saving, 40_000)
   assert.equal(parsed.params.monthly_expense, 80_000)
   assert.equal(parsed.params.current_age, 35)
   assert.equal(parsed.params.death_age, 90)
