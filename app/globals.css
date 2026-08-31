@@ -209,6 +209,29 @@ h1 {
   cursor: pointer;
 }
 
+.asset-shortcuts {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: -6px;
+}
+
+.asset-shortcut {
+  border: 1px solid rgba(15, 118, 110, 0.2);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.7);
+  color: var(--brand-dark);
+  padding: 8px 5px;
+  font-size: 0.78rem;
+  font-weight: 750;
+}
+
+.asset-shortcut-selected {
+  border-color: var(--brand-dark);
+  background: var(--brand);
+  color: white;
+}
+
 .hint,
 .error {
   margin: 0;

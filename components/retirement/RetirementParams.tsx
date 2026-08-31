@@ -56,6 +56,27 @@ function RangeField({ label, value, min, max, step, unit, onChange }: NumberFiel
   )
 }
 
+function TenThousandRangeField({ value, onChange }: { value: number; onChange: (value: number) => void }) {
+  const tenThousands = value / 10_000
+
+  return (
+    <label className="field">
+      <span className="field-row">
+        <span>退休前每月投入</span>
+        <span>{tenThousands.toLocaleString()} 萬</span>
+      </span>
+      <input
+        type="range"
+        min={0}
+        max={15}
+        step={1}
+        value={tenThousands}
+        onChange={(event) => onChange(Number(event.target.value) * 10_000)}
+      />
+    </label>
+  )
+}
+
 export default function RetirementParams({ params, errors, onChange }: Props) {
   return (
     <section className="card">
@@ -72,7 +93,19 @@ export default function RetirementParams({ params, errors, onChange }: Props) {
       <div className="form-section">
         <p className="form-section-title">資產起點</p>
         <RangeField label="目前可投資資產" value={params.current_base} min={0} max={50_000_000} step={100_000} unit="元" onChange={(current_base) => onChange({ current_base })} />
-        <RangeField label="退休前每月投入" value={params.monthly_saving} min={0} max={1_000_000} step={5_000} unit="元" onChange={(monthly_saving) => onChange({ monthly_saving })} />
+        <div className="asset-shortcuts" aria-label="資產起點快捷選項">
+          {[0, 1_000_000, 3_000_000, 5_000_000, 10_000_000, 20_000_000].map((amount) => (
+            <button
+              className={`asset-shortcut${params.current_base === amount ? ' asset-shortcut-selected' : ''}`}
+              key={amount}
+              type="button"
+              onClick={() => onChange({ current_base: amount })}
+            >
+              {amount === 0 ? '0' : `${amount / 10_000} 萬`}
+            </button>
+          ))}
+        </div>
+        <TenThousandRangeField value={params.monthly_saving} onChange={(monthly_saving) => onChange({ monthly_saving })} />
       </div>
 
       <div className="form-section">

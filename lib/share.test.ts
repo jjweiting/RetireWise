@@ -41,6 +41,18 @@ test('parseSharedParams rejects current assets above 5000萬', () => {
   assert.equal(parsed.params.current_base, DEFAULT_PARAMS.current_base)
 })
 
+test('parseSharedParams rejects monthly saving above 15萬', () => {
+  const parsed = parseSharedParams('?saving=150001', DEFAULT_PARAMS)
+
+  assert.equal(parsed.params.monthly_saving, DEFAULT_PARAMS.monthly_saving)
+})
+
+test('parseSharedParams only accepts monthly saving in whole 萬 units', () => {
+  const parsed = parseSharedParams('?saving=35000', DEFAULT_PARAMS)
+
+  assert.equal(parsed.params.monthly_saving, DEFAULT_PARAMS.monthly_saving)
+})
+
 test('serializeSharedParams includes all numeric params and optional name', () => {
   const query = serializeSharedParams(DEFAULT_PARAMS, '基準情境')
   const params = new URLSearchParams(query)

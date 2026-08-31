@@ -17,6 +17,10 @@ test('zero pre-retirement return with monthly saving does not divide by zero', (
   assert.ok(result.fi4.table.length > 0)
 })
 
+test('monthly saving above 15萬 is rejected', () => {
+  assert.throws(() => calculateRetirementFI({ ...DEFAULT_PARAMS, monthly_saving: 150_001 }), /不能大於 15 萬/)
+})
+
 test('higher monthly expense increases required assets', () => {
   const low = calculateRetirementFI({ ...DEFAULT_PARAMS, monthly_expense: 40000 })
   const high = calculateRetirementFI({ ...DEFAULT_PARAMS, monthly_expense: 100000 })

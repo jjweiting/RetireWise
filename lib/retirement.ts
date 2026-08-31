@@ -29,6 +29,7 @@ export function validateRetirementParams(params: RetirementParams): string[] {
 
   if (params.current_base < 0) errors.push('目前資產不能小於 0')
   if (params.monthly_saving < 0) errors.push('退休前每月投入不能小於 0')
+  if (params.monthly_saving > 150_000) errors.push('退休前每月投入不能大於 15 萬')
   if (params.monthly_expense <= 0) errors.push('每月目標生活費必須大於 0')
   if (params.current_age <= 0) errors.push('目前年齡必須大於 0')
   if (params.death_age <= params.current_age) errors.push('預期壽命必須大於目前年齡')

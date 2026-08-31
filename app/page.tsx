@@ -104,7 +104,11 @@ export default function Home() {
 
   const applyScenario = (scenario: SavedScenario) => {
     setSelectedPresetId(null)
-    setParams({ ...DEFAULT_PARAMS, ...scenario.params })
+    setParams({
+      ...DEFAULT_PARAMS,
+      ...scenario.params,
+      monthly_saving: Math.min(Math.round(scenario.params.monthly_saving / 10_000) * 10_000, 150_000),
+    })
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 

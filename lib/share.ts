@@ -11,7 +11,7 @@ interface ParamRule {
 
 const PARAM_RULES: ParamRule[] = [
   { query: 'asset', key: 'current_base', min: 0, max: 50_000_000 },
-  { query: 'saving', key: 'monthly_saving', min: 0, max: 1_000_000 },
+  { query: 'saving', key: 'monthly_saving', min: 0, max: 150_000 },
   { query: 'expense', key: 'monthly_expense', min: 10_000, max: 300_000 },
   { query: 'age', key: 'current_age', min: 18, max: 90 },
   { query: 'life', key: 'death_age', min: 50, max: 120 },
@@ -40,6 +40,7 @@ export function parseSharedParams(search: string, defaults: RetirementParams): P
 
     const value = Number(raw)
     if (!Number.isFinite(value) || value < rule.min || value > rule.max) continue
+    if (rule.key === 'monthly_saving' && value % 10_000 !== 0) continue
     params[rule.key] = value
   }
 
