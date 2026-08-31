@@ -11,10 +11,9 @@ test('monthly saving copy clarifies it is pre-retirement investing', () => {
   assert.match(summaryComponent, /退休前每月投入/)
 })
 
-test('home page provides dashboard, studio, and guided planning views', () => {
+test('home page presents the scenario studio as the primary workspace', () => {
   const page = readFileSync('app/page.tsx', 'utf8')
 
-  assert.match(page, /退休儀表板/)
   assert.match(page, /情境工作台/)
-  assert.match(page, /規劃引導/)
+  assert.match(page, /studio-live-results/)
 })
