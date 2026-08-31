@@ -4,6 +4,7 @@ interface Props {
   result: RetirementResult
   params: RetirementParams
   compact?: boolean
+  variant?: 'default' | 'dashboard'
 }
 
 function money(value: number): string {
@@ -14,13 +15,13 @@ function yearLabel(year: number | null): string {
   return year === null ? '尚未達成' : String(year)
 }
 
-export default function RetirementSummaryCards({ result, params, compact = false }: Props) {
+export default function RetirementSummaryCards({ result, params, compact = false, variant = 'default' }: Props) {
   const reached = result.fi4.gap <= 0
 
   return (
-    <section className="card">
-      <h2>試算結果</h2>
-      <div className="summary-grid">
+    <section className={`card summary-card-${variant}`}>
+      <h2>{variant === 'dashboard' ? '你的退休儀表板' : '試算結果'}</h2>
+      <div className={`summary-grid summary-grid-${variant}`}>
         <div className="metric">
           <div className="metric-label">FI 年份</div>
           <p className="metric-value">{reached ? yearLabel(result.fi4.retire_year) : '尚未達成'}</p>

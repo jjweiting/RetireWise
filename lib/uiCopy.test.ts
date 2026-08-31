@@ -11,10 +11,10 @@ test('monthly saving copy clarifies it is pre-retirement investing', () => {
   assert.match(summaryComponent, /退休前每月投入/)
 })
 
-test('home page provides quick, safety, and full planning views', () => {
+test('home page provides dashboard, studio, and guided planning views', () => {
   const page = readFileSync('app/page.tsx', 'utf8')
 
-  assert.match(page, /快速試算/)
-  assert.match(page, /安全檢視/)
-  assert.match(page, /完整規劃/)
+  assert.match(page, /退休儀表板/)
+  assert.match(page, /情境工作台/)
+  assert.match(page, /規劃引導/)
 })
