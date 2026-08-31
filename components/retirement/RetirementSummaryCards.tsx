@@ -3,6 +3,7 @@ import type { RetirementParams, RetirementResult } from '@/lib/types'
 interface Props {
   result: RetirementResult
   params: RetirementParams
+  compact?: boolean
 }
 
 function money(value: number): string {
@@ -13,7 +14,7 @@ function yearLabel(year: number | null): string {
   return year === null ? '尚未達成' : String(year)
 }
 
-export default function RetirementSummaryCards({ result, params }: Props) {
+export default function RetirementSummaryCards({ result, params, compact = false }: Props) {
   const reached = result.fi4.gap <= 0
 
   return (
@@ -35,21 +36,23 @@ export default function RetirementSummaryCards({ result, params }: Props) {
           <p className="metric-value">{Math.round(result.fi4.progress)}%</p>
           <p className="metric-subtext">缺口 {money(result.fi4.gap)}</p>
         </div>
-        <div className="metric">
-          <div className="metric-label">壽命規劃月花費</div>
-          <p className="metric-value">{money(result.filt_max_monthly)}</p>
-          <p className="metric-subtext">以 {params.death_age} 歲、剩餘 {money(params.bequest)} 估算</p>
-        </div>
-        <div className="metric">
-          <div className="metric-label">資產起點</div>
-          <p className="metric-value">{money(params.current_base)}</p>
-          <p className="metric-subtext">退休前每月投入 {money(params.monthly_saving)}</p>
-        </div>
-        <div className="metric">
-          <div className="metric-label">假設條件</div>
-          <p className="metric-value">{params.pre_return}% / {params.post_return}%</p>
-          <p className="metric-subtext">退休前 / 退休後年化報酬率</p>
-        </div>
+        {!compact && <>
+          <div className="metric">
+            <div className="metric-label">壽命規劃月花費</div>
+            <p className="metric-value">{money(result.filt_max_monthly)}</p>
+            <p className="metric-subtext">以 {params.death_age} 歲、剩餘 {money(params.bequest)} 估算</p>
+          </div>
+          <div className="metric">
+            <div className="metric-label">資產起點</div>
+            <p className="metric-value">{money(params.current_base)}</p>
+            <p className="metric-subtext">退休前每月投入 {money(params.monthly_saving)}</p>
+          </div>
+          <div className="metric">
+            <div className="metric-label">假設條件</div>
+            <p className="metric-value">{params.pre_return}% / {params.post_return}%</p>
+            <p className="metric-subtext">退休前 / 退休後年化報酬率</p>
+          </div>
+        </>}
       </div>
     </section>
   )

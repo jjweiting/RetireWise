@@ -10,3 +10,11 @@ test('monthly saving copy clarifies it is pre-retirement investing', () => {
   assert.doesNotMatch(paramsComponent, /每月儲蓄 \/ 投入/)
   assert.match(summaryComponent, /退休前每月投入/)
 })
+
+test('home page provides quick, safety, and full planning views', () => {
+  const page = readFileSync('app/page.tsx', 'utf8')
+
+  assert.match(page, /快速試算/)
+  assert.match(page, /安全檢視/)
+  assert.match(page, /完整規劃/)
+})

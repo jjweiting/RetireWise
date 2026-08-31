@@ -116,6 +116,46 @@ h1 {
   align-items: start;
 }
 
+.view-switcher {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 22px;
+}
+
+.view-button {
+  display: grid;
+  gap: 4px;
+  border: 1px solid rgba(15, 118, 110, 0.2);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.62);
+  color: var(--ink);
+  padding: 14px 16px;
+  text-align: left;
+}
+
+.view-button strong {
+  color: var(--brand-dark);
+  font-size: 0.94rem;
+}
+
+.view-button span {
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+.view-button-selected {
+  border-color: var(--brand-dark);
+  background: linear-gradient(135deg, rgba(20, 184, 166, 0.2), rgba(255, 255, 255, 0.9));
+  box-shadow: 0 12px 24px rgba(15, 118, 110, 0.12);
+}
+
+.compact-mode-hint {
+  border-top: 1px solid var(--line);
+  margin-top: 14px;
+  padding-top: 14px;
+}
+
 .stack {
   display: grid;
   gap: 18px;
@@ -584,6 +624,10 @@ th {
 
   .summary-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .view-switcher {
+    grid-template-columns: 1fr;
   }
 
   .market-stress-grid {

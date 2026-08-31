@@ -18,6 +18,14 @@ import { buildShareUrl, parseSharedParams } from '@/lib/share'
 import { deleteSavedScenario, loadSavedScenarios, saveSavedScenarios } from '@/lib/storage'
 import type { RetirementParams as RetirementParamsType, RetirementResult, SavedScenario } from '@/lib/types'
 
+type ViewMode = 'quick' | 'safety' | 'full'
+
+const VIEW_MODES: { id: ViewMode; label: string; description: string }[] = [
+  { id: 'quick', label: '快速試算', description: '用關鍵數字找出退休時間' },
+  { id: 'safety', label: '安全檢視', description: '確認市場下跌時的承受度' },
+  { id: 'full', label: '完整規劃', description: '查看敏感度、曲線與情境' },
+]
+
 function createId(): string {
   if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) return crypto.randomUUID()
   return `${Date.now()}-${Math.random().toString(16).slice(2)}`
@@ -39,6 +47,7 @@ export default function Home() {
   const [accelerationYears, setAccelerationYears] = useState(5)
   const [extraMonthlySaving, setExtraMonthlySaving] = useState(5_000)
   const [shareUrl, setShareUrl] = useState('')
+  const [viewMode, setViewMode] = useState<ViewMode>('quick')
   const errors = validateRetirementParams(params)
   const result = errors.length === 0 ? calculateSafely(params) : null
 
@@ -135,28 +144,46 @@ export default function Home() {
         </aside>
       </header>
 
+      <nav className="view-switcher" aria-label="檢視模式" role="tablist">
+        {VIEW_MODES.map((mode) => (
+          <button
+            aria-selected={viewMode === mode.id}
+            className={`view-button${viewMode === mode.id ? ' view-button-selected' : ''}`}
+            key={mode.id}
+            onClick={() => setViewMode(mode.id)}
+            role="tab"
+            type="button"
+          >
+            <strong>{mode.label}</strong>
+            <span>{mode.description}</span>
+          </button>
+        ))}
+      </nav>
+
       <div className="grid">
         <div className="stack">
           <RetirementPresetSelector selectedPresetId={selectedPresetId} onApply={applyPreset} />
-          <RetirementParams params={params} errors={errors} onChange={updateParams} />
+          <RetirementParams compact={viewMode === 'quick'} params={params} errors={errors} onChange={updateParams} />
         </div>
 
         <div className="stack">
           {result ? (
             <>
-              <RetirementSummaryCards result={result} params={params} />
-              <RetirementMarketStress result={result} params={params} />
-              <RetirementSensitivity params={params} />
-              <RetirementEarlySavingComparison
-                params={params}
-                accelerationYears={accelerationYears}
-                extraMonthlySaving={extraMonthlySaving}
-                onAccelerationYearsChange={setAccelerationYears}
-                onExtraMonthlySavingChange={setExtraMonthlySaving}
-              />
-              <RetirementCurveChart result={result} />
-              <RetirementKeyYearSummary fi4Table={result.fi4.table} filtTable={result.filt.table} />
-              <RetirementYearlyTable fi4Table={result.fi4.table} filtTable={result.filt.table} />
+              <RetirementSummaryCards compact={viewMode === 'quick'} result={result} params={params} />
+              {viewMode !== 'quick' && <RetirementMarketStress result={result} params={params} />}
+              {viewMode !== 'quick' && <RetirementSensitivity params={params} />}
+              {viewMode === 'full' && <>
+                <RetirementEarlySavingComparison
+                  params={params}
+                  accelerationYears={accelerationYears}
+                  extraMonthlySaving={extraMonthlySaving}
+                  onAccelerationYearsChange={setAccelerationYears}
+                  onExtraMonthlySavingChange={setExtraMonthlySaving}
+                />
+                <RetirementCurveChart result={result} />
+                <RetirementKeyYearSummary fi4Table={result.fi4.table} filtTable={result.filt.table} />
+                <RetirementYearlyTable fi4Table={result.fi4.table} filtTable={result.filt.table} />
+              </>}
             </>
           ) : (
             <section className="card">
@@ -165,14 +192,16 @@ export default function Home() {
             </section>
           )}
 
-          <RetirementSharePanel shareUrl={shareUrl} sharedName={sharedName} onSaveShared={saveSharedScenario} />
-          <RetirementScenarioManager
-            scenarios={scenarios}
-            canSave={result !== null}
-            onSave={saveScenario}
-            onApply={applyScenario}
-            onDelete={removeScenario}
-          />
+          {viewMode === 'full' && <>
+            <RetirementSharePanel shareUrl={shareUrl} sharedName={sharedName} onSaveShared={saveSharedScenario} />
+            <RetirementScenarioManager
+              scenarios={scenarios}
+              canSave={result !== null}
+              onSave={saveScenario}
+              onApply={applyScenario}
+              onDelete={removeScenario}
+            />
+          </>}
         </div>
       </div>
     </main>
