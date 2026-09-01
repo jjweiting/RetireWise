@@ -41,6 +41,7 @@ export default function Home() {
   const [extraMonthlySaving, setExtraMonthlySaving] = useState(5_000)
   const [shareUrl, setShareUrl] = useState('')
   const [mobilePanel, setMobilePanel] = useState<'inputs' | 'results'>('inputs')
+  const [decision, setDecision] = useState<'retire' | 'spend'>('retire')
   const errors = validateRetirementParams(params)
   const result = errors.length === 0 ? calculateSafely(params) : null
 
@@ -166,21 +167,30 @@ export default function Home() {
         <div className="studio-canvas stack">
           <p className="eyebrow studio-label">情境工作台</p>
           {result ? <>
+            <nav className="decision-tabs" aria-label="退休決策模式" role="tablist">
+              <button aria-selected={decision === 'retire'} className={decision === 'retire' ? 'decision-tab decision-tab-selected' : 'decision-tab'} onClick={() => setDecision('retire')} role="tab" type="button">何時能退休</button>
+              <button aria-selected={decision === 'spend'} className={decision === 'spend' ? 'decision-tab decision-tab-selected' : 'decision-tab'} onClick={() => setDecision('spend')} role="tab" type="button">現在能花多少</button>
+            </nav>
             <div className="studio-live-results">
-              <RetirementSummaryCards result={result} params={params} />
-              <RetirementMarketStress result={result} params={params} />
+              <RetirementSummaryCards decision={decision} result={result} params={params} />
+              {decision === 'retire' && <RetirementMarketStress result={result} params={params} />}
             </div>
-            <RetirementCurveChart result={result} />
-            <RetirementSensitivity params={params} />
-            <RetirementEarlySavingComparison
-              params={params}
-              accelerationYears={accelerationYears}
-              extraMonthlySaving={extraMonthlySaving}
-              onAccelerationYearsChange={setAccelerationYears}
-              onExtraMonthlySavingChange={setExtraMonthlySaving}
-            />
-            <RetirementKeyYearSummary fi4Table={result.fi4.table} filtTable={result.filt.table} />
-            <RetirementYearlyTable fi4Table={result.fi4.table} filtTable={result.filt.table} />
+            {decision === 'retire' ? <>
+              <RetirementCurveChart result={result} />
+              <RetirementSensitivity params={params} />
+              <RetirementEarlySavingComparison
+                params={params}
+                accelerationYears={accelerationYears}
+                extraMonthlySaving={extraMonthlySaving}
+                onAccelerationYearsChange={setAccelerationYears}
+                onExtraMonthlySavingChange={setExtraMonthlySaving}
+              />
+              <RetirementKeyYearSummary fi4Table={result.fi4.table} filtTable={result.filt.table} />
+              <RetirementYearlyTable fi4Table={result.fi4.table} filtTable={result.filt.table} />
+            </> : <section className="card">
+              <h2>這個結果代表什麼？</h2>
+              <p className="result-lead">此模式假設你今天停止工作，以目前資產支付生活費直到 {params.death_age} 歲。它不計入未來每月投入；若要判斷何時能達到你的目標生活費，請切換到「何時能退休」。</p>
+            </section>}
           </> : <InvalidInputCard />}
           <RetirementSharePanel shareUrl={shareUrl} sharedName={sharedName} onSaveShared={saveSharedScenario} />
           <RetirementScenarioManager
@@ -192,7 +202,7 @@ export default function Home() {
           />
         </div>
       </div>
-      {result && <RetirementMobileStatus result={result} params={params} />}
+      {result && <RetirementMobileStatus decision={decision} result={result} params={params} />}
     </main>
   )
 }

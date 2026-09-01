@@ -1,6 +1,6 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { calculateRetirementFI, DEFAULT_PARAMS, futureValue } from './retirement'
+import { calculateCurrentMaxMonthly, calculateRetirementFI, DEFAULT_PARAMS, futureValue } from './retirement'
 
 test('default params produce FI and lifespan results', () => {
   const result = calculateRetirementFI(DEFAULT_PARAMS)
@@ -40,6 +40,13 @@ test('bequest reduces lifespan-mode max monthly spending', () => {
   const noBequest = calculateRetirementFI({ ...DEFAULT_PARAMS, bequest: 0 })
   const withBequest = calculateRetirementFI({ ...DEFAULT_PARAMS, bequest: 3000000 })
   assert.ok(withBequest.filt_max_monthly < noBequest.filt_max_monthly)
+})
+
+test('current retirement spending decreases when a bequest is required', () => {
+  const noBequest = calculateCurrentMaxMonthly(DEFAULT_PARAMS)
+  const withBequest = calculateCurrentMaxMonthly({ ...DEFAULT_PARAMS, bequest: 3_000_000 })
+
+  assert.ok(withBequest < noBequest)
 })
 
 test('FI is not reached when assets only become sufficient at expected death age', () => {

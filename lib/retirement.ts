@@ -240,6 +240,11 @@ function calculateMaxMonthly(
   return Math.max((startAsset - presentBequest) / denominator, 0)
 }
 
+export function calculateCurrentMaxMonthly(params: RetirementParams): number {
+  const years = Math.max(params.death_age - params.current_age, 1)
+  return calculateMaxMonthly(params.current_base, params.post_return / 100, params.inflation / 100, years, params.bequest)
+}
+
 function simulateRetirement(
   startAsset: number,
   monthlyAtRetire: number,

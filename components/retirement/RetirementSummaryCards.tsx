@@ -1,8 +1,10 @@
+import { calculateCurrentMaxMonthly } from '@/lib/retirement'
 import type { RetirementParams, RetirementResult } from '@/lib/types'
 
 interface Props {
   result: RetirementResult
   params: RetirementParams
+  decision: 'retire' | 'spend'
 }
 
 function money(value: number): string {
@@ -13,8 +15,35 @@ function yearLabel(year: number | null): string {
   return year === null ? '尚未達成' : String(year)
 }
 
-export default function RetirementSummaryCards({ result, params }: Props) {
+export default function RetirementSummaryCards({ result, params, decision }: Props) {
   const reached = result.fi4.gap <= 0
+  const currentMaxMonthly = calculateCurrentMaxMonthly(params)
+
+  if (decision === 'spend') {
+    return (
+      <section className="card">
+        <h2>現在退休能花多少？</h2>
+        <p className="result-lead">以目前可投資資產規劃到 {params.death_age} 歲，且壽命終點保留 {money(params.bequest)}。</p>
+        <div className="summary-grid decision-summary-grid">
+          <div className="metric decision-primary-metric">
+            <div className="metric-label">可持續月花費</div>
+            <p className="metric-value">{money(currentMaxMonthly)}</p>
+            <p className="metric-subtext">從現在起提領，隨通膨調整</p>
+          </div>
+          <div className="metric">
+            <div className="metric-label">目前可投資資產</div>
+            <p className="metric-value">{money(params.current_base)}</p>
+            <p className="metric-subtext">尚未計入未來每月投入</p>
+          </div>
+          <div className="metric">
+            <div className="metric-label">目標生活費差額</div>
+            <p className="metric-value">{money(currentMaxMonthly - params.monthly_expense)}</p>
+            <p className="metric-subtext">相對今日輸入的月生活費</p>
+          </div>
+        </div>
+      </section>
+    )
+  }
 
   return (
     <section className="card">
