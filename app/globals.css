@@ -129,6 +129,10 @@ h1 {
   display: none;
 }
 
+.mobile-workspace-tabs {
+  display: none;
+}
+
 .studio-layout {
   display: grid;
   grid-template-columns: minmax(300px, 360px) minmax(0, 1fr);
@@ -621,6 +625,42 @@ th {
 
   .studio-canvas {
     order: -1;
+  }
+
+  .mobile-workspace-tabs {
+    position: sticky;
+    z-index: 20;
+    top: 0;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    margin-bottom: 14px;
+    border: 1px solid rgba(15, 118, 110, 0.16);
+    border-radius: 16px;
+    background: rgba(247, 243, 234, 0.94);
+    box-shadow: 0 10px 24px rgba(45, 33, 12, 0.1);
+    padding: 6px;
+    backdrop-filter: blur(14px);
+  }
+
+  .mobile-workspace-tab {
+    border: 0;
+    border-radius: 11px;
+    background: transparent;
+    color: var(--muted);
+    padding: 10px;
+    font-size: 0.9rem;
+    font-weight: 800;
+  }
+
+  .mobile-workspace-tab-selected {
+    background: var(--brand-dark);
+    color: white;
+  }
+
+  .studio-layout.mobile-panel-inputs .studio-canvas,
+  .studio-layout.mobile-panel-results .studio-controls {
+    display: none;
   }
 
   .page {

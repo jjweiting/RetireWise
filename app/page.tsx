@@ -40,6 +40,7 @@ export default function Home() {
   const [accelerationYears, setAccelerationYears] = useState(5)
   const [extraMonthlySaving, setExtraMonthlySaving] = useState(5_000)
   const [shareUrl, setShareUrl] = useState('')
+  const [mobilePanel, setMobilePanel] = useState<'inputs' | 'results'>('inputs')
   const errors = validateRetirementParams(params)
   const result = errors.length === 0 ? calculateSafely(params) : null
 
@@ -136,7 +137,28 @@ export default function Home() {
         </aside>
       </header>
 
-      <div className="studio-layout">
+      <nav className="mobile-workspace-tabs" aria-label="手機工作台區塊" role="tablist">
+        <button
+          aria-selected={mobilePanel === 'inputs'}
+          className={mobilePanel === 'inputs' ? 'mobile-workspace-tab mobile-workspace-tab-selected' : 'mobile-workspace-tab'}
+          onClick={() => setMobilePanel('inputs')}
+          role="tab"
+          type="button"
+        >
+          輸入設定
+        </button>
+        <button
+          aria-selected={mobilePanel === 'results'}
+          className={mobilePanel === 'results' ? 'mobile-workspace-tab mobile-workspace-tab-selected' : 'mobile-workspace-tab'}
+          onClick={() => setMobilePanel('results')}
+          role="tab"
+          type="button"
+        >
+          結果報告
+        </button>
+      </nav>
+
+      <div className={`studio-layout mobile-panel-${mobilePanel}`}>
         <aside className="studio-controls">
           <RetirementPresetSelector selectedPresetId={selectedPresetId} onApply={applyPreset} />
           <RetirementParams params={params} errors={errors} onChange={updateParams} />

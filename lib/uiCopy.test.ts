@@ -23,3 +23,10 @@ test('mobile layout keeps an immediate retirement status visible', () => {
 
   assert.match(page, /RetirementMobileStatus/)
 })
+
+test('mobile workspace separates inputs from results with tabs', () => {
+  const page = readFileSync('app/page.tsx', 'utf8')
+
+  assert.match(page, /輸入設定/)
+  assert.match(page, /結果報告/)
+})
