@@ -4,19 +4,21 @@ import type { RetirementParams, RetirementResult } from '@/lib/types'
 interface Props {
   params: RetirementParams
   result: RetirementResult
+  decision: 'preserve' | 'lifespan'
 }
 
 function money(value: number): string {
   return `NT$ ${Math.round(value).toLocaleString()}`
 }
 
-export default function RetirementMarketStress({ params, result }: Props) {
-  if (result.fi4.years_to_retire === null) return null
+export default function RetirementMarketStress({ params, result, decision }: Props) {
+  const mode = decision === 'preserve' ? result.fi4 : result.filt
+  if (mode.years_to_retire === null) return null
 
-  const stress = calculateHistoricalMarketStress(params, result.fi4.required, result.fi4.years_to_retire)
+  const stress = calculateHistoricalMarketStress(params, mode.required, mode.years_to_retire)
   if (!stress) return null
 
-  const percentileExtraAsset = Math.max(stress.percentileRequiredAsset - result.fi4.required, 0)
+  const percentileExtraAsset = Math.max(stress.percentileRequiredAsset - mode.required, 0)
 
   return (
     <section className="card market-stress-card">

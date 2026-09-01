@@ -52,36 +52,66 @@ export function calculateRetirementFI(params: RetirementParams, options: Retirem
   const inflation = params.inflation / 100
   const projectAsset = options.projectAsset ?? ((years: number) => futureValue(params.current_base, params.monthly_saving, preReturn, years))
   const fixedExpenseMode = calculateFixedExpenseMode(params, preReturn, postReturn, inflation, projectAsset)
-  const yearsToRetire = fixedExpenseMode.years_to_retire ?? 30
-  const retireYear = CURRENT_YEAR + yearsToRetire
-  const retireAge = params.current_age + yearsToRetire
-  const yearsAfterRetirement = Math.max(params.death_age - retireAge, 1)
-  const retirementAsset = projectAsset(yearsToRetire)
-  const maxMonthly = calculateMaxMonthly(retirementAsset, postReturn, inflation, yearsAfterRetirement, params.bequest)
-  const lifespanTable = simulateRetirement(
-    retirementAsset,
-    maxMonthly,
-    inflation,
-    postReturn,
-    retireYear,
-    yearsAfterRetirement,
-    retireAge,
-  )
+  const lifespanMode = calculateLifespanExpenseMode(params, postReturn, inflation, projectAsset)
 
   return {
     fi4: fixedExpenseMode,
-    filt: {
-      years_to_retire: yearsToRetire,
-      retire_year: retireYear,
-      retire_age: retireAge,
-      required: retirementAsset,
-      gap: 0,
-      progress: 100,
-      monthly_at_retire: maxMonthly,
-      table: lifespanTable,
-    },
-    filt_max_monthly: Math.round(maxMonthly),
-    filt_retire_year_input: retireYear,
+    filt: lifespanMode,
+    filt_max_monthly: Math.round(lifespanMode.monthly_at_retire),
+    filt_retire_year_input: lifespanMode.retire_year ?? CURRENT_YEAR,
+  }
+}
+
+function calculateLifespanExpenseMode(
+  params: RetirementParams,
+  postReturn: number,
+  inflation: number,
+  projectAsset: (years: number) => number,
+): RetirementModeResult {
+  let yearsToRetire: number | null = null
+  let requiredAtRetirement = 0
+  let projectedAtRetirement = 0
+  const maxRetirementYears = Math.min(MAX_SEARCH_YEARS, Math.max(params.death_age - params.current_age - 1, 0))
+
+  for (let years = 1; years <= maxRetirementYears; years += 1) {
+    const projected = projectAsset(years)
+    const yearsAfter = Math.max(params.death_age - params.current_age - years, 1)
+    const required = findRequiredForBequest(params.monthly_expense, postReturn, inflation, years, yearsAfter, params.bequest)
+
+    if (projected >= required) {
+      yearsToRetire = years
+      requiredAtRetirement = required
+      projectedAtRetirement = projected
+      break
+    }
+
+    requiredAtRetirement = required
+    projectedAtRetirement = projected
+  }
+
+  const displayYears = yearsToRetire ?? Math.max(maxRetirementYears, 1)
+  const retireYear = CURRENT_YEAR + displayYears
+  const retireAge = params.current_age + displayYears
+  const yearsAfter = Math.max(params.death_age - retireAge, 1)
+  const required = yearsToRetire === null
+    ? findRequiredForBequest(params.monthly_expense, postReturn, inflation, displayYears, yearsAfter, params.bequest)
+    : requiredAtRetirement
+  const projected = yearsToRetire === null ? projectAsset(displayYears) : projectedAtRetirement
+  const monthlyAtRetire = params.monthly_expense * (1 + inflation) ** displayYears
+  const gap = Math.max(required - projected, 0)
+  const progress = required > 0 ? Math.min((projected / required) * 100, 100) : 100
+
+  return {
+    years_to_retire: yearsToRetire,
+    retire_year: yearsToRetire === null ? null : retireYear,
+    retire_age: yearsToRetire === null ? null : retireAge,
+    required,
+    gap,
+    progress,
+    monthly_at_retire: monthlyAtRetire,
+    table: yearsToRetire === null
+      ? [{ year: retireYear, age: `${retireAge} 歲`, monthly_expense: Math.round(monthlyAtRetire), annual_expense: Math.round(monthlyAtRetire * 12), investment_return: 0, end_asset: Math.round(projected), depleted: false }]
+      : simulateRetirement(required, monthlyAtRetire, inflation, postReturn, retireYear, yearsAfter, retireAge),
   }
 }
 
@@ -201,6 +231,27 @@ function findRequiredPrincipal(
   return hi
 }
 
+function findRequiredForBequest(
+  monthlyExpenseToday: number,
+  postReturn: number,
+  inflation: number,
+  yearsToRetire: number,
+  yearsAfterRetirement: number,
+  bequest: number,
+): number {
+  let lo = 0
+  let hi = BINARY_SEARCH_MAX_ASSET
+
+  for (let i = 0; i < 50; i += 1) {
+    const mid = (lo + hi) / 2
+    const finalAsset = simulateFinalAsset(mid, monthlyExpenseToday, inflation, postReturn, yearsToRetire, yearsAfterRetirement)
+    if (finalAsset >= bequest) hi = mid
+    else lo = mid
+  }
+
+  return hi
+}
+
 function simulateFinalAsset(
   startAsset: number,
   monthlyExpenseToday: number,
@@ -215,34 +266,10 @@ function simulateFinalAsset(
   for (let year = 1; year <= yearsAfterRetirement; year += 1) {
     const spend = monthlyAtRetire * (1 + inflation) ** (year - 1) * 12
     asset = asset * (1 + postReturn) - spend
-    if (asset <= 0) return 0
+    if (asset <= 0) return -1
   }
 
   return asset
-}
-
-function calculateMaxMonthly(
-  startAsset: number,
-  postReturn: number,
-  inflation: number,
-  years: number,
-  bequest = 0,
-): number {
-  const discount = (1 + postReturn) ** years
-  const presentBequest = discount === 0 ? 0 : bequest / discount
-  let denominator = 0
-
-  for (let year = 1; year <= years; year += 1) {
-    denominator += (12 * (1 + inflation) ** (year - 1)) / (1 + postReturn) ** year
-  }
-
-  if (denominator <= 0) return 0
-  return Math.max((startAsset - presentBequest) / denominator, 0)
-}
-
-export function calculateCurrentMaxMonthly(params: RetirementParams): number {
-  const years = Math.max(params.death_age - params.current_age, 1)
-  return calculateMaxMonthly(params.current_base, params.post_return / 100, params.inflation / 100, years, params.bequest)
 }
 
 function simulateRetirement(

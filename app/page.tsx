@@ -41,7 +41,7 @@ export default function Home() {
   const [extraMonthlySaving, setExtraMonthlySaving] = useState(5_000)
   const [shareUrl, setShareUrl] = useState('')
   const [mobilePanel, setMobilePanel] = useState<'inputs' | 'results'>('inputs')
-  const [decision, setDecision] = useState<'retire' | 'spend'>('retire')
+  const [decision, setDecision] = useState<'preserve' | 'lifespan'>('preserve')
   const errors = validateRetirementParams(params)
   const result = errors.length === 0 ? calculateSafely(params) : null
 
@@ -168,14 +168,14 @@ export default function Home() {
           <p className="eyebrow studio-label">情境工作台</p>
           {result ? <>
             <nav className="decision-tabs" aria-label="退休決策模式" role="tablist">
-              <button aria-selected={decision === 'retire'} className={decision === 'retire' ? 'decision-tab decision-tab-selected' : 'decision-tab'} onClick={() => setDecision('retire')} role="tab" type="button">何時能退休</button>
-              <button aria-selected={decision === 'spend'} className={decision === 'spend' ? 'decision-tab decision-tab-selected' : 'decision-tab'} onClick={() => setDecision('spend')} role="tab" type="button">現在能花多少</button>
+              <button aria-selected={decision === 'preserve'} className={decision === 'preserve' ? 'decision-tab decision-tab-selected' : 'decision-tab'} onClick={() => setDecision('preserve')} role="tab" type="button">本金保全</button>
+              <button aria-selected={decision === 'lifespan'} className={decision === 'lifespan' ? 'decision-tab decision-tab-selected' : 'decision-tab'} onClick={() => setDecision('lifespan')} role="tab" type="button">壽命規劃</button>
             </nav>
             <div className="studio-live-results">
               <RetirementSummaryCards decision={decision} result={result} params={params} />
-              {decision === 'retire' && <RetirementMarketStress result={result} params={params} />}
+              <RetirementMarketStress decision={decision} result={result} params={params} />
             </div>
-            {decision === 'retire' ? <>
+            {decision === 'preserve' ? <>
               <RetirementCurveChart result={result} />
               <RetirementSensitivity params={params} />
               <RetirementEarlySavingComparison
@@ -188,8 +188,8 @@ export default function Home() {
               <RetirementKeyYearSummary fi4Table={result.fi4.table} filtTable={result.filt.table} />
               <RetirementYearlyTable fi4Table={result.fi4.table} filtTable={result.filt.table} />
             </> : <section className="card">
-              <h2>這個結果代表什麼？</h2>
-              <p className="result-lead">此模式假設你今天停止工作，以目前資產支付生活費直到 {params.death_age} 歲。它不計入未來每月投入；若要判斷何時能達到你的目標生活費，請切換到「何時能退休」。</p>
+              <h2>壽命規劃的差異</h2>
+              <p className="result-lead">此模式同樣以每月目標生活費找最早退休年齡，但允許資產逐步使用至壽命終點的目標剩餘金額，因此通常會比本金保全模式更早退休。</p>
             </section>}
           </> : <InvalidInputCard />}
           <RetirementSharePanel shareUrl={shareUrl} sharedName={sharedName} onSaveShared={saveSharedScenario} />
